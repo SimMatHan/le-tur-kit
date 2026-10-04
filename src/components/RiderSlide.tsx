@@ -1,5 +1,6 @@
 import type { ReactNode } from 'react';
-import type { Person } from '../content/types';
+import type { JerseyId, Person } from '../content/types';
+import { JerseyRow } from './JerseyBadge';
 import { FitText } from './FitText';
 import { Medallion, type MedallionColor } from './Medallion';
 import { PhotoFrame } from './PhotoFrame';
@@ -14,6 +15,8 @@ interface Props {
   page?: number;
   /** Ekstra lag, fx redigeringsknapper. */
   overlay?: ReactNode;
+  /** Trøjer, rytteren fører lige nu. */
+  leads?: JerseyId[];
 }
 
 export function Chip({ children }: { children: ReactNode }) {
@@ -40,7 +43,7 @@ export function Chip({ children }: { children: ReactNode }) {
 }
 
 /** Præsentation af en rytter (eller kommissæren): foto, medaljon, navn, kælenavn, bio og egenskaber. */
-export function RiderSlide({ person, kicker, medallionLabel, medallionValue, medallionColor = 'red', page, overlay }: Props) {
+export function RiderSlide({ person, kicker, medallionLabel, medallionValue, medallionColor = 'red', page, overlay, leads = [] }: Props) {
   return (
     <div className="slide bg-paper">
       <PhotoFrame photo={person.photo} alt={person.name} style={{ left: 86, top: 86, width: 664, height: 864 }} />
@@ -54,8 +57,13 @@ export function RiderSlide({ person, kicker, medallionLabel, medallionValue, med
       />
 
       <div style={{ position: 'absolute', left: 864, top: 118, width: 970 }}>
-        <p className="kicker c-red" style={{ fontSize: 26 }}>
+        <p className="kicker c-red" style={{ fontSize: 26, display: 'flex', alignItems: 'center', gap: 22, height: 40 }}>
           {kicker}
+          {leads.length > 0 && (
+            <span style={{ display: 'inline-flex', alignItems: 'center', gap: 10, color: 'var(--navy)' }}>
+              · Fører <JerseyRow jerseys={leads} size={44} gap={4} />
+            </span>
+          )}
         </p>
         <FitText
           max={92}

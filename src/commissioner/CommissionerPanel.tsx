@@ -1,4 +1,4 @@
-import { useState, type KeyboardEvent } from 'react';
+import { useEffect, useRef, useState, type KeyboardEvent } from 'react';
 import { useContent } from '../content/ContentContext';
 import { useGame, useStandings } from '../game/GameContext';
 import { useCommissioner } from './CommissionerContext';
@@ -28,6 +28,8 @@ export function CommissionerPanel() {
   const { canUndo, undo, updateStage } = useGame();
   const standings = useStandings();
   const [tab, setTab] = useState<'stage' | 'ties'>('stage');
+  const bodyRef = useRef<HTMLDivElement>(null);
+  useEffect(() => bodyRef.current?.scrollTo({ top: 0 }), [n, tab]);
   const stage = stages.find((s) => s.n === n) ?? stages[0];
   const result = standings.stageResults.find((r) => r.n === stage.n)!;
   const Panel = panels[stage.scoring.type];
@@ -84,7 +86,7 @@ export function CommissionerPanel() {
         </button>
       </nav>
 
-      <div className="editor-body">
+      <div className="editor-body" ref={bodyRef}>
         {tab === 'ties' ? (
           <section className="panel-section">
             <h3>Uafgjort i klassementet</h3>

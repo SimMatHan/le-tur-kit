@@ -41,10 +41,23 @@ export const stressEdits = {
   },
 };
 
+// Resultater til stresstesten: alle 10 ryttere gennem etape 1, 2 og 5 (inkl. delt plads).
+const ids = stressEdits.riders.map((r) => r.id);
+const fin = (input) => ({ status: 'finished', input, adjust: {}, tieOrder: [] });
+const stressGame = {
+  version: 1,
+  classificationTieOrder: {},
+  stages: {
+    1: fin({ type: 'prolog', times: Object.fromEntries(ids.map((id, i) => [id, 8 + (i % 7) * 1.3])) }),
+    2: fin({ type: 'sprint', order: [...ids].reverse(), carrotGroups: [], bonuses: { start: ids[3], third: ids[4] } }),
+    5: fin({ type: 'champs', hits: [ids[1]], vinokourovDice: 12, rounds: [] }),
+  },
+};
+
 const runs = [
   { name: 'standard', w: 1920, h: 1080 },
   { name: 'standard', w: 1280, h: 720 },
-  { name: 'stress', w: 1920, h: 1080, edits: stressEdits },
+  { name: 'stress', w: 1920, h: 1080, edits: stressEdits, game: stressGame },
 ];
 
 const browser = await chromium.launch({ executablePath });
@@ -62,7 +75,13 @@ for (const run of runs) {
     route.abort();
   });
   if (run.edits) {
-    await page.addInitScript((e) => localStorage.setItem('le-tur-2026:content', JSON.stringify(e)), run.edits);
+    await page.addInitScript(
+      ([e, g]) => {
+        localStorage.setItem('le-tur-2026:content', JSON.stringify(e));
+        if (g) localStorage.setItem('le-tur-2026:game', JSON.stringify(g));
+      },
+      [run.edits, run.game ?? null],
+    );
   }
 
   await page.goto(url + '#/1');

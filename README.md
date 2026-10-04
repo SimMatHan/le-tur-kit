@@ -2,7 +2,7 @@
 
 Drukspil-etapeløb for vennegruppen som web-app: præsentation på storskærm, kommissærpanel til at køre etaperne og automatisk klassement. Al tekst er på dansk, og alt kører i browseren (ingen backend, ingen login, ingen tracking).
 
-> Status: **fase 4** – præsentation, redigering, backup, scoringsmotor og kommissærpaneler til alle fem etaper.
+> Status: **fase 5** – præsentation, redigering, backup, scoringsmotor, kommissærpaneler, klassement og podie.
 
 ## Kom i gang
 
@@ -85,6 +85,13 @@ Tryk **K** (eller **▶ Kør etapen** på en ruteside, når musen bevæges). Pan
 | 5 Champs-Élysées | Hvem ramte. Én: **Vinokourov-mirakel** med terningsum. Flere: knock-out med tilfældig parring, walkover og klik på vinderen af hver duel. | Vinokourov-animation, bracket |
 
 Fanen **Klassement** viser uafgjorte trøjer, som ikke kan afgøres automatisk, og lader kommissæren vælge rækkefølgen.
+
+## Klassement og podie
+
+- **S** viser klassementet som overlay; desuden er der en stillings-slide efter hver etape (med etapevinderen). Føreren af hver trøje står med trøjeikonet ved navnet – grøn og prikket kræver mindst ét point.
+- Rytter-slides viser "Fører" med trøjeikoner, når rytteren fører en trøje.
+- **Podiet** udfyldes automatisk med navne og fotos (rygnummer som medaljon, hvis der intet foto er): top 3 i gul på trappen, vinderne af grøn og prikket ved siden af. Indtil alle etaper er afsluttet, står der "Foreløbig stilling". Når løbet er slut, kommer der konfetti (slås fra ved *reducer bevægelse*).
+- **Uafgjort** vises eksplicit: "1=" og "Delt plads" på trappen, "delt trøje" ved trøjerne. Kommissæren afgør det under **K → Klassement**.
 
 ## Scoring
 

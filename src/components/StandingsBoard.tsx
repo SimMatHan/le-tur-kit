@@ -5,6 +5,7 @@ import { HardShadowCard } from './HardShadowCard';
 import { JerseyBadge } from './JerseyBadge';
 import { formatGap, formatTime } from '../game/format';
 import { FitText } from './FitText';
+import { jerseyLeader } from '../game/podium';
 
 const cols: { id: JerseyId; title: string }[] = [
   { id: 'gul', title: 'Samlet tid' },
@@ -20,6 +21,7 @@ export function StandingsBoard({ standings, top = 250 }: { standings: Standings;
   const rowH = Math.min(72, Math.floor(560 / Math.max(n, 1)));
   const fs = Math.min(30, rowH - 26);
   const empty = standings.countedStages.length === 0;
+  const leaders = { gul: jerseyLeader(standings, 'gul'), gron: jerseyLeader(standings, 'gron'), prik: jerseyLeader(standings, 'prik') };
   return (
     <div style={{ position: 'absolute', left: 86, top, width: 1748, display: 'flex', gap: 44 }}>
       {cols.map((c) => {
@@ -48,10 +50,10 @@ export function StandingsBoard({ standings, top = 250 }: { standings: Standings;
                 <span className="num c-red" style={{ width: 52, fontSize: fs + 6 }}>
                   {empty ? '–' : `${r.rank}.`}
                 </span>
-                <FitText max={fs} min={14} style={{ flex: 1, minWidth: 0, height: rowH - 4, fontWeight: 700, whiteSpace: 'nowrap', display: 'flex', alignItems: 'center' }}>
+                <FitText max={fs} min={13} style={{ flex: 1, minWidth: 0, height: rowH - 4, fontWeight: 700, lineHeight: 1.05, display: 'flex', alignItems: 'center', overflowWrap: 'anywhere' }}>
                   {name(r.riderId)}
                 </FitText>
-                {!empty && r.rank === 1 && !r.tied && <JerseyBadge jersey={c.id} size={rowH - 18} />}
+                {leaders[c.id] === r.riderId && <JerseyBadge jersey={c.id} size={rowH - 18} />}
                 {!empty && r.tied && (
                   <span title="Uafgjort – afgøres af kommissæren" style={{ color: 'var(--red)', fontWeight: 700 }}>
                     =

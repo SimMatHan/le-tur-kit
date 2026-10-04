@@ -1,33 +1,56 @@
 import { useContent } from '../content/ContentContext';
-import { Podium, type PodiumPerson } from '../components/Podium';
+import { Confetti } from '../components/Confetti';
+import { Podium, type PodiumJersey, type PodiumPerson } from '../components/Podium';
 import { FlagIcon } from '../components/icons';
+import { formatGap, formatTime } from '../game/format';
 import { useStandings } from '../game/GameContext';
+import { podiumData, type JerseyWinner } from '../game/podium';
 import type { SlideProps } from './types';
 
 export function PodiumSlide(_: SlideProps) {
-  const { podium, riders } = useContent();
+  const { podium, riders, stages } = useContent();
   const standings = useStandings();
-  const done = standings.countedStages.length > 0;
-  const person = (id?: string): PodiumPerson | null => {
-    const r = done && id ? riders.find((x) => x.id === id) : undefined;
-    return r ? { name: r.name, photo: r.photo } : null;
+  const data = podiumData(standings, stages.length);
+
+  const person = (id: string | undefined, rank?: number, tied?: boolean): PodiumPerson | null => {
+    const r = id ? riders.find((x) => x.id === id) : undefined;
+    return r ? { name: r.name, photo: r.photo, number: r.number, rank, tied } : null;
   };
-  const gul = standings.tables.gul;
+  const jersey = (w: JerseyWinner | null, unit: string): PodiumJersey | null =>
+    w ? { people: w.riderIds.map((id) => person(id)!).filter(Boolean), value: `${w.value} ${unit}`, tied: w.tied } : null;
+
+  const leaderTime = standings.tables.gul[0]?.value ?? 0;
+  const details = data.top.map((s, i) => {
+    if (!s) return null;
+    const t = standings.totals[s.riderId]?.timeSec ?? 0;
+    return i === 0 || s.rank === 1 ? formatTime(t) : formatGap(t - leaderTime);
+  });
+
+  const kicker = !data.hasResults
+    ? 'Udfyldes automatisk, når etaperne er kørt'
+    : data.final
+      ? podium.kicker
+      : `Foreløbig stilling efter ${data.stagesCounted} af ${stages.length} etaper`;
+
   return (
     <div className="slide bg-navy">
+      {data.final && <Confetti />}
       <div className="slide-head" style={{ top: 66 }}>
         <h1 className="h-title c-yellow">{podium.title}</h1>
-        <p className="kicker c-paper" style={{ marginTop: 34, fontSize: 24 }}>
-          {podium.kicker}
+        <p className="kicker c-paper" style={{ marginTop: 30, fontSize: 24 }}>
+          {kicker}
+          {data.unresolved && <span className="c-yellow"> · uafgjort afgøres af kommissæren</span>}
         </p>
       </div>
       <div style={{ position: 'absolute', right: 86, top: 66 }}>
         <FlagIcon size={110} />
       </div>
       <Podium
-        top={[person(gul[0]?.riderId), person(gul[1]?.riderId), person(gul[2]?.riderId)]}
-        green={person(standings.tables.gron[0]?.riderId)}
-        prik={person(standings.tables.prik[0]?.riderId)}
+        top={data.top.map((s) => (s ? person(s.riderId, s.rank, s.tied) : null))}
+        green={jersey(data.gron, 'point')}
+        prik={jersey(data.prik, 'bjergpoint')}
+        details={details}
+        hasResults={data.hasResults}
       />
     </div>
   );
