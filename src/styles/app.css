@@ -90,6 +90,9 @@
   transition: opacity 200ms;
   z-index: 100;
 }
+.editing .controls {
+  right: calc(var(--editor-w) + 16px);
+}
 .show-chrome .controls {
   opacity: 1;
   pointer-events: auto;

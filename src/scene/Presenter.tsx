@@ -5,8 +5,20 @@ import { expandDeck } from './deckTypes';
 import { Scene, Thumb } from './Scene';
 import { useDeckNav } from './useDeckNav';
 import { StandingsOverlay } from './StandingsOverlay';
+import { EditorPanel } from '../editor/EditorPanel';
+import { SetupPanel } from '../editor/SetupPanel';
 
-type Overlay = null | 'overview' | 'standings' | 'help';
+type Overlay = null | 'overview' | 'standings' | 'help' | 'setup';
+
+function useEditorWidth() {
+  const [w, setW] = useState(() => Math.round(Math.min(440, window.innerWidth * 0.42)));
+  useEffect(() => {
+    const on = () => setW(Math.round(Math.min(440, window.innerWidth * 0.42)));
+    window.addEventListener('resize', on);
+    return () => window.removeEventListener('resize', on);
+  }, []);
+  return w;
+}
 
 const isTyping = (e: KeyboardEvent) => {
   const t = e.target as HTMLElement | null;
@@ -24,11 +36,32 @@ export function Presenter() {
   const { index, direction, go, next, prev } = useDeckNav(slides.length);
   const [overlay, setOverlay] = useState<Overlay>(null);
   const [chrome, setChrome] = useState(false);
+  const [editing, setEditing] = useState(false);
+  const [pendingEdit, setPendingEdit] = useState<string | null>(null);
+  const editorW = useEditorWidth();
   const hideTimer = useRef<number | undefined>(undefined);
 
   const slide = slides[index];
 
   const toggle = useCallback((o: Exclude<Overlay, null>) => setOverlay((cur) => (cur === o ? null : o)), []);
+  const editTarget = slide?.editTarget;
+  const editorOpen = editing && !!editTarget;
+
+  useEffect(() => {
+    if (editing && !editTarget && !pendingEdit) setEditing(false);
+  }, [editing, editTarget, pendingEdit]);
+
+  // Hop til en rytters slide og åbn redigering (også for en netop tilføjet rytter).
+  useEffect(() => {
+    if (!pendingEdit) return;
+    const i = slides.findIndex((s) => s.editTarget === pendingEdit);
+    if (i >= 0) {
+      go(i);
+      setEditing(true);
+      setOverlay(null);
+      setPendingEdit(null);
+    }
+  }, [pendingEdit, slides, go]);
 
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
@@ -68,14 +101,19 @@ export function Presenter() {
         case '?':
           toggle('help');
           break;
+        case 'e':
+        case 'E':
+          if (editTarget) setEditing((v) => !v);
+          break;
         case 'Escape':
-          setOverlay(null);
+          if (overlay) setOverlay(null);
+          else setEditing(false);
           break;
       }
     };
     window.addEventListener('keydown', onKey);
     return () => window.removeEventListener('keydown', onKey);
-  }, [next, prev, go, toggle, overlay, slides.length]);
+  }, [next, prev, go, toggle, overlay, slides.length, editTarget]);
 
   // Knapper vises kun, når musen bevæges – projektoren forbliver ren.
   useEffect(() => {
@@ -95,8 +133,11 @@ export function Presenter() {
   const { Component } = slide;
 
   return (
-    <div className={`presenter ${chrome ? 'show-chrome' : 'hide-cursor'}`}>
-      <Scene>
+    <div
+      className={`presenter ${chrome || editorOpen ? 'show-chrome' : 'hide-cursor'} ${editorOpen ? 'editing' : ''}`}
+      style={{ ['--editor-w' as string]: `${editorW}px` }}
+    >
+      <Scene reserveRight={editorOpen ? editorW : 0}>
         <div key={slide.key} className={`slide-anim ${direction > 0 ? 'from-right' : 'from-left'}`}>
           <Component page={index + 1} {...slide.props} />
         </div>
@@ -121,6 +162,14 @@ export function Presenter() {
         </CtrlButton>
         <CtrlButton label="Klassement (S)" onClick={() => toggle('standings')}>
           Stilling
+        </CtrlButton>
+        {editTarget && (
+          <CtrlButton label="Redigér (E)" onClick={() => setEditing((v) => !v)}>
+            Redigér
+          </CtrlButton>
+        )}
+        <CtrlButton label="Opsætning og backup" onClick={() => toggle('setup')}>
+          Opsætning
         </CtrlButton>
         <CtrlButton label="Fuldskærm (F)" onClick={toggleFullscreen}>
           ⛶
@@ -157,6 +206,17 @@ export function Presenter() {
       )}
 
       {overlay === 'help' && <HelpOverlay onClose={() => setOverlay(null)} />}
+
+      {editorOpen && editTarget && (
+        <EditorPanel
+          target={editTarget}
+          onClose={() => setEditing(false)}
+          onAdded={(id) => setPendingEdit(id)}
+          onOpenSetup={() => setOverlay('setup')}
+        />
+      )}
+
+      {overlay === 'setup' && <SetupPanel onClose={() => setOverlay(null)} onEditRider={(id) => setPendingEdit(id)} />}
     </div>
   );
 }
@@ -175,7 +235,7 @@ const keys: [string, string][] = [
   ['O', 'Oversigt med miniaturer'],
   ['S', 'Klassement'],
   ['K', 'Kommissærpanel'],
-  ['E', 'Redigér rytter (på rytter-slides)'],
+  ['E', 'Redigér rytter/kommissær (på deres slides)'],
   ['Esc', 'Luk overlays'],
 ];
 

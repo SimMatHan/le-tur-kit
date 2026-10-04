@@ -3,7 +3,8 @@ dist
 *.local
 .wrangler
 # Rytterfotos og backups må aldrig committes
-backup*.json
-le-tur-backup*.json
+*backup*.json
+
 photos/
 test-results/
+*.tsbuildinfo

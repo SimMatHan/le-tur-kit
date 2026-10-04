@@ -23,19 +23,15 @@ export function Chip({ children }: { children: ReactNode }) {
         display: 'inline-flex',
         alignItems: 'center',
         justifyContent: 'center',
-        minWidth: 260,
-        maxWidth: 520,
-        height: 86,
-        padding: '0 40px',
-        borderRadius: 43,
+        minWidth: '8.7em',
+        height: '2.87em',
+        padding: '0 1.33em',
+        borderRadius: '1.45em',
         background: 'var(--yellow)',
         border: 'var(--border)',
         boxShadow: '4px 4px 0 var(--navy)',
         fontWeight: 700,
-        fontSize: 30,
         whiteSpace: 'nowrap',
-        overflow: 'hidden',
-        textOverflow: 'ellipsis',
       }}
     >
       {children}
@@ -53,7 +49,7 @@ export function RiderSlide({ person, kicker, medallionLabel, medallionValue, med
         label={medallionLabel}
         color={medallionColor}
         size={206}
-        valueSize={typeof medallionValue === 'string' && medallionValue.length > 1 ? 70 : 84}
+        valueSize={String(medallionValue).length >= 3 ? 64 : String(medallionValue).length === 2 ? 74 : 84}
         style={{ position: 'absolute', left: 625, top: 33 }}
       />
 
@@ -87,11 +83,14 @@ export function RiderSlide({ person, kicker, medallionLabel, medallionValue, med
         <p className="kicker" style={{ fontSize: 26 }}>
           Egenskaber
         </p>
-        <div style={{ display: 'flex', flexWrap: 'wrap', gap: '18px 26px', marginTop: 30, maxHeight: 210, overflow: 'hidden', paddingBottom: 6 }}>
-          {person.traits.map((t, i) => (
-            <Chip key={i}>{t}</Chip>
-          ))}
-        </div>
+        {/* Chips er målt i em, så FitText kan skalere dem ned, hvis der er mange. */}
+        <FitText max={30} min={16} style={{ height: 214, marginTop: 30 }}>
+          <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.6em 0.87em', paddingBottom: 6, paddingRight: 6 }}>
+            {person.traits.map((t, i) => (
+              <Chip key={i}>{t}</Chip>
+            ))}
+          </div>
+        </FitText>
       </div>
       <SlideFooter page={page} />
       {overlay}
