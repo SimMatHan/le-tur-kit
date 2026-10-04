@@ -1,6 +1,6 @@
 import { useContent } from '../content/ContentContext';
 import type { JerseyId } from '../content/types';
-import type { StandingsView } from '../game/useStandings';
+import type { Standings } from '../game/scoring';
 import { HardShadowCard } from './HardShadowCard';
 import { JerseyBadge } from './JerseyBadge';
 import { formatGap, formatTime } from '../game/format';
@@ -13,13 +13,13 @@ const cols: { id: JerseyId; title: string }[] = [
 ];
 
 /** Tre kolonner med klassementet. Førende i hver trøje får trøjeikonet ved navnet. */
-export function StandingsBoard({ standings, top = 250 }: { standings: StandingsView; top?: number }) {
+export function StandingsBoard({ standings, top = 250 }: { standings: Standings; top?: number }) {
   const { riders } = useContent();
   const name = (id: string) => riders.find((r) => r.id === id)?.name ?? '?';
   const n = riders.length;
   const rowH = Math.min(72, Math.floor(560 / Math.max(n, 1)));
   const fs = Math.min(30, rowH - 26);
-  const empty = standings.completedStages === 0;
+  const empty = standings.countedStages.length === 0;
   return (
     <div style={{ position: 'absolute', left: 86, top, width: 1748, display: 'flex', gap: 44 }}>
       {cols.map((c) => {

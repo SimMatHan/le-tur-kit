@@ -1,13 +1,13 @@
 import { useContent } from '../content/ContentContext';
 import { Podium, type PodiumPerson } from '../components/Podium';
 import { FlagIcon } from '../components/icons';
-import { useStandings } from '../game/useStandings';
+import { useStandings } from '../game/GameContext';
 import type { SlideProps } from './types';
 
 export function PodiumSlide(_: SlideProps) {
   const { podium, riders } = useContent();
   const standings = useStandings();
-  const done = standings.completedStages > 0;
+  const done = standings.countedStages.length > 0;
   const person = (id?: string): PodiumPerson | null => {
     const r = done && id ? riders.find((x) => x.id === id) : undefined;
     return r ? { name: r.name, photo: r.photo } : null;

@@ -164,6 +164,75 @@ await step('Import genskaber indhold og foto', async () => {
   expect((await sceneText()).includes('Den allervidende'), 'kommissær ikke genskabt');
 });
 
+await step('Klassement, stilling og podie viser resultater fra spiltilstanden (fuldt løb med 6 ryttere)', async () => {
+  // Samme løb som håndregningen i src/game/scoring.test.ts (a–f = r1–r6).
+  const names = ['Anna', 'Bent', 'Carl', 'Dorte', 'Erik', 'Frida'];
+  const riders = names.map((name, i) => ({ id: `r${i + 1}`, number: i + 1, name, nickname: '', bio: '', traits: [], photo: null }));
+  const m = (o) => Object.fromEntries(Object.entries(o).map(([k, v]) => [`r${'abcdef'.indexOf(k) + 1}`, v]));
+  const id = (k) => `r${'abcdef'.indexOf(k) + 1}`;
+  const st = (input) => ({ status: 'finished', input, adjust: {}, tieOrder: [] });
+  const gameState = {
+    version: 1,
+    classificationTieOrder: {},
+    stages: {
+      1: st({ type: 'prolog', times: m({ a: 8.4, b: 10.1, c: 7.9, d: 12, e: 9.5, f: 15.2 }) }),
+      2: st({ type: 'sprint', order: ['b', 'a', 'f', 'c', 'e', 'd'].map(id), carrotGroups: [], bonuses: { start: id('f'), third: id('d') } }),
+      3: st({
+        type: 'udbrud',
+        quiz: { '0-0': ['a', 'b', 'c'].map(id), '0-4': [id('a')], '2-3': ['c', 'd'].map(id), '4-2': [id('e')] },
+        dice: m({ a: 0, b: 4.2, c: 12.5, d: 2, e: 7.7, f: 20 }),
+      }),
+      4: st({ type: 'bjerg', hits: ['b', 'e'].map(id), dice: m({ b: 7, e: 11 }), times: m({ a: 9, b: 14, c: 8, d: 11.5, e: 16, f: 10 }) }),
+      5: st({
+        type: 'champs',
+        hits: ['a', 'c', 'd', 'f'].map(id),
+        vinokourovDice: null,
+        rounds: [
+          { duels: [{ a: id('a'), b: id('c'), winner: id('c') }, { a: id('d'), b: id('f'), winner: id('d') }] },
+          { duels: [{ a: id('c'), b: id('d'), winner: id('d') }] },
+        ],
+      }),
+    },
+  };
+  await page.evaluate(
+    ([c, g]) => {
+      localStorage.setItem('le-tur-2026:content', JSON.stringify(c));
+      localStorage.setItem('le-tur-2026:game', JSON.stringify(g));
+      location.hash = '#/1';
+    },
+    [{ riders }, gameState],
+  );
+  await page.reload();
+  await waitReload();
+  await page.keyboard.press('s');
+  await page.waitForTimeout(300);
+  if (process.env.E2E_SHOTS) await page.screenshot({ path: `${process.env.E2E_SHOTS}/klassement.png` });
+  const overlay = await page.locator('.scene').innerText();
+  expect(/Efter 5 af 5 etaper/.test(overlay), 'overlay viser ikke 5 etaper');
+  expect(overlay.includes('10,4'), 'førerens tid 10,4 mangler');
+  expect(overlay.includes('83 p') && overlay.includes('26 p'), 'point mangler');
+  await page.keyboard.press('Escape');
+  // Podiet er sidste slide
+  await page.keyboard.press('End');
+  await page.waitForTimeout(400);
+  if (process.env.E2E_SHOTS) await page.screenshot({ path: `${process.env.E2E_SHOTS}/podie.png` });
+  const podium = await sceneText();
+  for (const n of ['Anna', 'Bent', 'Dorte', 'Erik']) expect(podium.includes(n), `${n} mangler på podiet`);
+  // Stilling efter etape 3: Anna fører med 5,4
+  const total = await slideCount();
+  for (let i = 1; i <= total; i++) {
+    await page.evaluate((n) => (location.hash = `#/${n}`), i);
+    await page.waitForTimeout(60);
+    const t = await sceneText();
+    if (t.includes('Stillingen efter etape 3')) {
+      if (process.env.E2E_SHOTS) await page.screenshot({ path: `${process.env.E2E_SHOTS}/stilling-3.png` });
+      expect(t.includes('5,4'), 'stilling efter etape 3 forkert');
+      return;
+    }
+  }
+  throw new Error('fandt ikke stilling efter etape 3');
+});
+
 if (errors.length) {
   failed++;
   console.log('✗ Fejl i siden:\n   ' + errors.join('\n   '));

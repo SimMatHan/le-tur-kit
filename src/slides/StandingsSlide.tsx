@@ -1,7 +1,7 @@
 import { useContent } from '../content/ContentContext';
 import { StandingsBoard } from '../components/StandingsBoard';
 import { SlideFooter } from '../components/SlideFooter';
-import { useStandings } from '../game/useStandings';
+import { useStandings } from '../game/GameContext';
 import type { SlideProps } from './types';
 
 export function StandingsSlide({ page, afterStage }: SlideProps & { afterStage: number }) {
@@ -14,7 +14,7 @@ export function StandingsSlide({ page, afterStage }: SlideProps & { afterStage: 
         <h1 className="h-title">Stillingen efter etape {afterStage}</h1>
         <p className="lead" style={{ marginTop: 30 }}>
           {stage?.name}
-          {standings.completedStages < afterStage && ' · resultaterne er ikke indtastet endnu'}
+          {!standings.countedStages.includes(afterStage) && ' · resultaterne er ikke indtastet endnu'}
         </p>
       </div>
       <StandingsBoard standings={standings} top={270} />

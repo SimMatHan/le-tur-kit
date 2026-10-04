@@ -2,7 +2,7 @@
 
 Drukspil-etapeløb for vennegruppen som web-app: præsentation på storskærm, kommissærpanel til at køre etaperne og automatisk klassement. Al tekst er på dansk, og alt kører i browseren (ingen backend, ingen login, ingen tracking).
 
-> Status: **fase 2** – præsentation, redigering af ryttere/kommissær, fotos, eksport/import og nulstil.
+> Status: **fase 3** – præsentation, redigering, backup og scoringsmotor med tests. Klassement og podie regnes ud automatisk.
 
 ## Kom i gang
 
@@ -69,6 +69,20 @@ reference/         design-reference.pdf, de oprindelige filer og det oprindelige
 
 1. Lav en komponent i `src/slides/`, der tager `{ page }` (og evt. egne props).
 2. Tilføj én linje i `src/deck.ts`, fx `{ id: 'min-slide', title: 'Min slide', component: MinSlide }`.
+
+## Scoring
+
+Al regnelogik ligger i `src/game/` som rene funktioner uden React og er dækket af Vitest:
+
+- `scoring.ts` – `computeStage()` laver kommissærens rå input om til placeringer, tid til gul, point til grøn og bjergpoint for én etape. `computeStandings()` lægger etaperne sammen til de tre klassementer.
+- `bracket.ts` – knock-out til Carrot in the Box (tilfældig parring, walkover ved ulige antal, placeringer).
+- `gameState.ts` – validering af gemt/importeret spiltilstand og fortryd-historik.
+
+Spiltilstanden indeholder kun rå input (tider, rækkefølger, quizsvar, terningsummer, duel-vindere) plus manuelle rettelser. Alt andet regnes ud hver gang, så en rettet tid slår igennem overalt. Den gemmes i `localStorage` og kommer med i backuppen.
+
+**Lighed:** Etapeplaceringer med præcis samme tid (0,1 s) deles (1, 1, 3 …), indtil kommissæren vælger rækkefølgen. I trøjerne afgøres lighed efter `rules.tieBreak`: flest etapesejre → bedst placeret på seneste etape → kommissærens afgørelse.
+
+`src/game/scoring.test.ts` indeholder et komplet testløb med 6 ryttere gennem alle 5 etaper. Håndregningen står som kommentar i testen.
 
 ## Regler
 
