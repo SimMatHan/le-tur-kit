@@ -33,7 +33,10 @@ export function CommissionerPanel({ embedded = false }: { embedded?: boolean }) 
   const standings = useStandings();
   const [tab, setTab] = useState<'stage' | 'ties'>('stage');
   const bodyRef = useRef<HTMLDivElement>(null);
-  useEffect(() => bodyRef.current?.scrollTo({ top: 0 }), [n, tab]);
+  useEffect(() => {
+    // Nyere browsere returnerer et Promise fra scrollTo – det må ikke returneres fra effekten.
+    bodyRef.current?.scrollTo({ top: 0 });
+  }, [n, tab]);
   const stage = stages.find((s) => s.n === n) ?? stages[0];
   const result = standings.stageResults.find((r) => r.n === stage.n)!;
   const Panel = panels[stage.scoring.type];

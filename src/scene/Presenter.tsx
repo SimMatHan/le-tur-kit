@@ -251,23 +251,26 @@ export function Presenter() {
         <div className="overview" onClick={() => setOverlay(null)}>
           <div className="overview-grid" onClick={(e) => e.stopPropagation()}>
             {slides.map((s, i) => (
-              <button
-                key={s.key}
-                type="button"
-                className={`overview-item ${i === index ? 'current' : ''}`}
-                onClick={() => {
-                  go(i);
-                  setOverlay(null);
-                }}
-                title={s.title}
-              >
+              // Miniaturen indeholder slidens egne knapper, så den må ikke ligge inde i en <button>.
+              // Klik-fladen er en gennemsigtig knap oven på miniaturen.
+              <div key={s.key} className={`overview-item ${i === index ? 'current' : ''}`} title={s.title}>
                 <Thumb width={300}>
                   <s.Component page={i + 1} {...s.props} />
                 </Thumb>
                 <span className="overview-label">
                   {i + 1}. {s.title}
                 </span>
-              </button>
+                <button
+                  type="button"
+                  className="overview-hit"
+                  aria-label={`Gå til slide ${i + 1}: ${s.title}`}
+                  aria-current={i === index ? 'true' : undefined}
+                  onClick={() => {
+                    go(i);
+                    setOverlay(null);
+                  }}
+                />
+              </div>
             ))}
           </div>
         </div>

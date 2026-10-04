@@ -201,8 +201,9 @@ npm run verify:dist   # statisk kontrol: dist/index.html har ingen eksterne ress
 npm run check:slides  # åbner dist/index.html fra disk uden netværk ved 1920×1080 og 1280×720
                       # og tjekker, at ingen tekst flyder ud eller klippes (også ved 10 ryttere og lange tekster)
 npm run test:e2e      # end-to-end i Chromium via file:// uden netværk
+npm run test:dev      # røgtest i udviklingstilstand: fejler ved React-advarsler (fx ugyldig HTML eller forkerte effekter)
 npm run test:remote   # fjernbetjening end-to-end: starter relæet lokalt (wrangler dev) og styrer skærmen fra en "telefon"
-npm run verify        # tests, build, verify:dist, check:slides og test:e2e
+npm run verify        # tests, build, verify:dist, test:dev, check:slides og test:e2e
 ```
 
 `check:slides` og `test:e2e` bruger Chromium via `playwright-core`. Findes Chromium ikke på standardstien, så sæt `CHROMIUM_PATH` til den lokale Chrome/Chromium.
