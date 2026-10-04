@@ -1,21 +1,17 @@
 // Kommissærtilstand (ikke gemt): hvilket panel der er åbent, stopurets ur,
-// hvad der vises på projektoren, og det åbne quizkort.
-import { createContext, useCallback, useContext, useMemo, useState, type ReactNode } from 'react';
+// hvad der vises på projektoren, og det åbne quizkort. Ved fjernbetjening
+// synkroniseres projektor-visning og ur mellem telefon og skærm.
+import { createContext, useCallback, useContext, useEffect, useMemo, useRef, useState, type ReactNode } from 'react';
 import { roundTenth } from '../game/format';
+import type { ClockData, ProjectorViewData } from '../remote/protocol';
+import { sharedNow } from '../remote/sharedTime';
 
-export type ProjectorView =
-  | null
-  | { kind: 'stopwatch'; stage: number }
-  | { kind: 'quiz'; cat: number; row: number; reveal: boolean }
-  | { kind: 'bracket' }
-  | { kind: 'vinokourov' }
-  | { kind: 'carrot'; a: string; b: string; third: string | null };
+export type ProjectorView = ProjectorViewData;
+export type Clock = ClockData;
 
-export interface Clock {
-  /** Date.now() da uret startede (justeret ved pause), null hvis stoppet. */
-  startedAt: number | null;
-  /** Akkumuleret tid i ms, når uret er stoppet. */
-  stoppedMs: number;
+export interface CommissionerSync {
+  projector?: ProjectorView;
+  clock?: Clock;
 }
 
 interface CommissionerCtx {
@@ -32,15 +28,29 @@ interface CommissionerCtx {
   resetClock: () => void;
   /** Aktuel tid i sekunder (tiendedele). */
   elapsed: () => number;
+  /** Anvend ændringer fra den anden enhed (sendes ikke videre). */
+  applyRemote: (s: CommissionerSync) => void;
 }
 
 const Ctx = createContext<CommissionerCtx | null>(null);
 
-export function CommissionerProvider({ children }: { children: ReactNode }) {
+interface Props {
+  children: ReactNode;
+  /** Kaldes, når brugeren her ændrer projektor-visning eller ur (til fjernbetjening). */
+  onLocalChange?: (s: CommissionerSync) => void;
+}
+
+export function CommissionerProvider({ children, onLocalChange }: Props) {
   const [open, setOpen] = useState(false);
   const [stage, setStage] = useState(1);
-  const [projector, setProjector] = useState<ProjectorView>(null);
-  const [clock, setClock] = useState<Clock>({ startedAt: null, stoppedMs: 0 });
+  const [projector, setProjectorState] = useState<ProjectorView>(null);
+  const [clock, setClockState] = useState<Clock>({ startedAt: null, stoppedMs: 0 });
+  const clockRef = useRef(clock);
+  clockRef.current = clock;
+  const onLocal = useRef(onLocalChange);
+  useEffect(() => {
+    onLocal.current = onLocalChange;
+  }, [onLocalChange]);
 
   const openPanel = useCallback((n?: number) => {
     if (n) setStage(n);
@@ -48,14 +58,39 @@ export function CommissionerProvider({ children }: { children: ReactNode }) {
   }, []);
   const closePanel = useCallback(() => setOpen(false), []);
 
-  const startClock = useCallback(() => setClock((c) => (c.startedAt ? c : { startedAt: Date.now() - c.stoppedMs, stoppedMs: 0 })), []);
-  const stopClock = useCallback(() => setClock((c) => (c.startedAt ? { startedAt: null, stoppedMs: Date.now() - c.startedAt } : c)), []);
-  const resetClock = useCallback(() => setClock({ startedAt: null, stoppedMs: 0 }), []);
-  const elapsed = useCallback(() => roundTenth(((clock.startedAt ? Date.now() - clock.startedAt : clock.stoppedMs) / 1000)), [clock]);
+  const setProjector = useCallback((v: ProjectorView) => {
+    setProjectorState(v);
+    onLocal.current?.({ projector: v });
+  }, []);
+
+  const setClock = useCallback((next: Clock) => {
+    clockRef.current = next;
+    setClockState(next);
+    onLocal.current?.({ clock: next });
+  }, []);
+
+  const startClock = useCallback(() => {
+    const c = clockRef.current;
+    if (!c.startedAt) setClock({ startedAt: sharedNow() - c.stoppedMs, stoppedMs: 0 });
+  }, [setClock]);
+  const stopClock = useCallback(() => {
+    const c = clockRef.current;
+    if (c.startedAt) setClock({ startedAt: null, stoppedMs: sharedNow() - c.startedAt });
+  }, [setClock]);
+  const resetClock = useCallback(() => setClock({ startedAt: null, stoppedMs: 0 }), [setClock]);
+  const elapsed = useCallback(() => roundTenth((clock.startedAt ? sharedNow() - clock.startedAt : clock.stoppedMs) / 1000), [clock]);
+
+  const applyRemote = useCallback((s: CommissionerSync) => {
+    if ('projector' in s) setProjectorState(s.projector ?? null);
+    if (s.clock) {
+      clockRef.current = s.clock;
+      setClockState(s.clock);
+    }
+  }, []);
 
   const value = useMemo(
-    () => ({ open, stage, openPanel, closePanel, setStage, projector, setProjector, clock, startClock, stopClock, resetClock, elapsed }),
-    [open, stage, openPanel, closePanel, projector, clock, startClock, stopClock, resetClock, elapsed],
+    () => ({ open, stage, openPanel, closePanel, setStage, projector, setProjector, clock, startClock, stopClock, resetClock, elapsed, applyRemote }),
+    [open, stage, openPanel, closePanel, projector, setProjector, clock, startClock, stopClock, resetClock, elapsed, applyRemote],
   );
   return <Ctx.Provider value={value}>{children}</Ctx.Provider>;
 }

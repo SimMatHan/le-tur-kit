@@ -62,7 +62,7 @@ Data ligger kun i den browser og på den computer, hvor du har redigeret. Brug e
 
 ## Kør etaperne (kommissærpanelet)
 
-Tryk **K**, eller klik **▶ Kør etapen** på en ruteside (knappen vises, når musen bevæges). Panelet lægger sig til højre, så sliden stadig kan ses. Øverst vælger du etape, og her er knapperne **Fortryd** (Ctrl+Z), **Afslut etapen** og **Genåbn etapen**. Nederst står etaperesultatet live. Med **✎** kan du rette tid, point og bjergpoint og skrive en note, og du kan afgøre uafgjorte placeringer.
+Tryk **K**, eller klik **▶ Kør etapen** på en ruteside (knappen vises, når musen bevæges). Panelet lægger sig til højre, så sliden stadig kan ses. Øverst vælger du etape, og her er knapperne **Fortryd** (Ctrl+Z), **Afslut etapen** og **Genåbn etapen**. Nederst står etaperesultatet live. Med **✎** kan du rette tid, point og bjergpoint og skrive en note, og du kan afgøre uafgjorte placeringer. **Nulstil etape** sletter alle data på den valgte etape og sætter den til "Ikke startet". Det kan fortrydes med Fortryd.
 
 | Etape | I panelet | På skærmen |
 |---|---|---|
@@ -73,6 +73,48 @@ Tryk **K**, eller klik **▶ Kør etapen** på en ruteside (knappen vises, når 
 | 5 Champs-Élysées | Hvem ramte. Én: **Vinokourov-mirakel** med terningsum. Flere: knock-out med tilfældig parring og walkover, hvor du klikker vinderen af hver duel. | Vinokourov-animation og bracket |
 
 Fanen **Klassement** viser uafgjorte trøjer, som ikke kan afgøres automatisk, og lader kommissæren vælge rækkefølgen.
+
+## Fjernbetjening fra telefonen
+
+Hele kommissærpanelet kan køres fra din telefon, mens præsentationen kører på storskærmen:
+
+- slides frem og tilbage og spring til en slide
+- alle fem etaper, inklusive stopur, quiz (svaret ses kun på telefonen), knock-out og Vinokourov
+- klassement-overlay, Fortryd og Nulstil etape
+
+Skærmen og telefonen taler sammen gennem et lille **relæ på Cloudflare**: en Worker med en Durable Object pr. "rum", som kører på gratisplanen. Den samme Worker serverer også appen, så telefonen kun skal bruge én adresse.
+
+```
+Telefon ──▶ Cloudflare-relæ (le-tur-2026.<konto>.workers.dev) ◀── Skærm (file:// eller samme adresse)
+```
+
+### Første gang: deploy relæet
+
+```bash
+npx wrangler login       # hvis du ikke allerede er logget ind
+npm run deploy:remote    # bygger appen og deployer relæ + app → https://le-tur-2026.<konto>.workers.dev
+```
+
+Konfigurationen ligger i `remote/wrangler.toml` (navn, Durable Object og app-filer) og koden i `remote/worker.ts`. Vil du afprøve det lokalt, kører `npm run dev:remote` relæet på `http://localhost:8787`.
+
+### Til spilaftenen
+
+1. **Skærmen:** Åbn præsentationen, enten `dist/index.html` fra disk eller `https://le-tur-2026.<konto>.workers.dev`. Gå til **Opsætning → Fjernbetjening**, indtast relæ-adressen (udfyldes automatisk, hvis siden er hentet fra relæet), og klik **Start fjernbetjening**.
+2. **Telefonen:** Scan QR-koden, eller åbn linket. Toppen viser "Skærmen er forbundet", når forbindelsen er oppe.
+3. **Status:** Værktøjslinjen på skærmen viser 📱 og antal forbundne telefoner. Fjernbetjeningen genopretter selv forbindelsen, hvis netværket falder ud, og telefonen kan genindlæses uden at miste noget.
+
+**Sådan virker det:**
+- **Skærmen er "sandheden".** Den gemmer alt lokalt som før, sender sin tilstand til telefonen og anvender telefonens ændringer.
+- **Stopuret** bruger relæets ur, så skærm og telefon viser samme tid.
+- **Intet gemmes på telefonen**, og **fotos sendes aldrig**.
+
+### Sikkerhed og privatliv
+
+- **Rumkoden er nøglen.** Den består af 12 tilfældige tegn, og alle med linket kan styre præsentationen, så del det ikke. **Ny rumkode** under Opsætning lukker gamle links.
+- **Relæet gemmer kun den seneste tilstand** (rytternavne og resultater, ikke fotos) i din egen Cloudflare-konto. Rummet slettes automatisk efter 3 dage uden aktivitet.
+- **Cloudflare Access på relæet:** Lægger du Access foran `le-tur-2026.<konto>.workers.dev`, så åbn præsentationen fra samme adresse (log ind én gang) i stedet for fra `file://`. En side åbnet fra disk har ikke Access-login og kan derfor ikke forbinde.
+  - Vil du alligevel bruge `file://` på skærmen, kan du tilføje en **Bypass**-policy for stien `/ws/*`. Så er det kun rumkoden, der beskytter forbindelsen.
+- **Appen på Pages:** Ligger den på Pages og ikke på relæet, kan du bygge med `VITE_APP_URL=https://le-tur-2026.pages.dev`. Så peger QR-koden på Pages-appen og sender relæ-adressen med i linket. `VITE_RELAY_URL` sætter relæ-adressen som standard i Opsætning.
 
 ## Klassement og podie
 
@@ -159,7 +201,8 @@ npm run verify:dist   # statisk kontrol: dist/index.html har ingen eksterne ress
 npm run check:slides  # åbner dist/index.html fra disk uden netværk ved 1920×1080 og 1280×720
                       # og tjekker, at ingen tekst flyder ud eller klippes (også ved 10 ryttere og lange tekster)
 npm run test:e2e      # end-to-end i Chromium via file:// uden netværk
-npm run verify        # alt ovenstående i rækkefølge
+npm run test:remote   # fjernbetjening end-to-end: starter relæet lokalt (wrangler dev) og styrer skærmen fra en "telefon"
+npm run verify        # tests, build, verify:dist, check:slides og test:e2e
 ```
 
 `check:slides` og `test:e2e` bruger Chromium via `playwright-core`. Findes Chromium ikke på standardstien, så sæt `CHROMIUM_PATH` til den lokale Chrome/Chromium.
@@ -188,8 +231,10 @@ src/
                    fotos (IndexedDB), beskæring, backup
   editor/          redigeringspanel (E) og opsætning (backup/nulstil)
   commissioner/    kommissærpanel (K), etapepaneler, bracket, Carrot-hjælper, projektor-overlays
+  remote/          fjernbetjening: protokol, forbindelse, skærmens side (RemoteHost), telefonens app, QR
   game/            scoring, knock-out, podie, quiz, spiltilstand (rene funktioner + Vitest)
 public/_headers    headers til Cloudflare Pages
+remote/            Cloudflare Worker + Durable Object (relæ) og wrangler.toml
 scripts/           check-slides, e2e, verify-dist og fælles testdata
 reference/         design-reference.pdf, de oprindelige filer og det oprindelige content.json
 ```

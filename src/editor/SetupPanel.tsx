@@ -2,6 +2,7 @@ import { useRef, useState } from 'react';
 import { useContentCtx } from '../content/ContentContext';
 import { MAX_RIDERS, MIN_RIDERS } from '../content/edits';
 import { exportSetup, importSetup, resetAll } from '../content/setupActions';
+import { RemoteSetup } from '../remote/RemoteSetup';
 
 interface Props {
   onClose: () => void;
@@ -82,6 +83,8 @@ export function SetupPanel({ onClose, onEditRider }: Props) {
             + Tilføj rytter
           </button>
         </section>
+
+        <RemoteSetup />
 
         <section>
           <h3>Backup</h3>

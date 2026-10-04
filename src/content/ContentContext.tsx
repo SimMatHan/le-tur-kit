@@ -24,8 +24,20 @@ interface ContentCtx {
 
 const Ctx = createContext<ContentCtx | null>(null);
 
-export function ContentProvider({ children, initialEdits }: { children: ReactNode; initialEdits?: ContentEdits }) {
-  const [edits, setEdits] = useState<ContentEdits>(() => initialEdits ?? sanitizeEdits(readJson(CONTENT_KEY)));
+interface ProviderProps {
+  children: ReactNode;
+  initialEdits?: ContentEdits;
+  /** Gem i localStorage (fra = telefon i fjernbetjeningstilstand). */
+  persist?: boolean;
+  /** Indhold styret udefra (skærmens indhold vist på telefonen). */
+  externalEdits?: ContentEdits;
+}
+
+export function ContentProvider({ children, initialEdits, persist = true, externalEdits }: ProviderProps) {
+  const [edits, setEdits] = useState<ContentEdits>(() => externalEdits ?? initialEdits ?? (persist ? sanitizeEdits(readJson(CONTENT_KEY)) : {}));
+  useEffect(() => {
+    if (externalEdits) setEdits(externalEdits);
+  }, [externalEdits]);
   const [saveFailed, setSaveFailed] = useState(false);
   const content = useMemo(() => applyEdits(defaultContent, edits), [edits]);
   const contentRef = useRef(content);
@@ -37,8 +49,8 @@ export function ContentProvider({ children, initialEdits }: { children: ReactNod
       first.current = false;
       return;
     }
-    setSaveFailed(!writeJson(CONTENT_KEY, edits));
-  }, [edits]);
+    if (persist) setSaveFailed(!writeJson(CONTENT_KEY, edits));
+  }, [edits, persist]);
 
   const setRiders = useCallback((fn: (riders: Rider[]) => Rider[]) => {
     setEdits((e) => ({ ...e, riders: fn(e.riders ?? defaultContent.riders) }));

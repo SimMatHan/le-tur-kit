@@ -11,6 +11,7 @@ import { useCommissioner } from '../commissioner/CommissionerContext';
 import { CommissionerPanel } from '../commissioner/CommissionerPanel';
 import { ProjectorOverlay } from '../commissioner/ProjectorOverlay';
 import { useGame } from '../game/GameContext';
+import { REMOTE_COMMAND_EVENT, useRemoteHost, type RemoteCommand } from '../remote/RemoteHost';
 
 type Overlay = null | 'overview' | 'standings' | 'help' | 'setup';
 
@@ -49,6 +50,24 @@ export function Presenter() {
   const hideTimer = useRef<number | undefined>(undefined);
 
   const slide = slides[index];
+
+  // Fjernbetjening: meld aktuel slide til telefonen og modtag dens kommandoer.
+  const { reportSlide, status: remoteStatus, peers: remotePeers } = useRemoteHost();
+  useEffect(() => {
+    if (slide) reportSlide({ index, count: slides.length, title: slide.title, stage: slide.stage }, slides.map((s) => s.title), overlay === 'standings' ? 'standings' : null);
+  }, [index, slide, slides, overlay, reportSlide]);
+  useEffect(() => {
+    const on = (e: Event) => {
+      const d = (e as CustomEvent<RemoteCommand>).detail;
+      if (d.nav === 'next') next();
+      else if (d.nav === 'prev') prev();
+      else if (typeof d.nav === 'number') go(d.nav);
+      if (d.overlay === 'standings') setOverlay('standings');
+      else if (d.overlay === null) setOverlay((cur) => (cur === 'standings' ? null : cur));
+    };
+    window.addEventListener(REMOTE_COMMAND_EVENT, on);
+    return () => window.removeEventListener(REMOTE_COMMAND_EVENT, on);
+  }, [next, prev, go]);
 
   const toggle = useCallback((o: Exclude<Overlay, null>) => setOverlay((cur) => (cur === o ? null : o)), []);
   const editTarget = slide?.editTarget;
@@ -212,6 +231,14 @@ export function Presenter() {
         <CtrlButton label="Opsætning og backup" onClick={() => toggle('setup')}>
           Opsætning
         </CtrlButton>
+        {remoteStatus !== 'off' && (
+          <span
+            className="controls-count"
+            title={remoteStatus === 'open' ? `Fjernbetjening: ${remotePeers?.remotes ?? 0} telefon(er) forbundet` : 'Fjernbetjening: ingen forbindelse til relæet'}
+          >
+            <span className={`dot st-${remoteStatus}`} aria-hidden /> 📱 {remoteStatus === 'open' ? (remotePeers?.remotes ?? 0) : '–'}
+          </span>
+        )}
         <CtrlButton label="Fuldskærm (F)" onClick={toggleFullscreen}>
           ⛶
         </CtrlButton>

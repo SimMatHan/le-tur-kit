@@ -14,13 +14,28 @@ interface GameCtx {
   updateStage: (n: number, fn: (s: StageState) => StageState) => void;
   undo: () => void;
   resetGame: () => void;
+  /** Anvend en tilstand fra den anden enhed (fjernbetjening). Sendes ikke videre. */
+  applyExternal: (g: GameState, opts?: { history?: boolean }) => void;
+}
+
+interface Props {
+  children: ReactNode;
+  /** Gem i localStorage (fra = telefon i fjernbetjeningstilstand). */
+  persist?: boolean;
+  /** Kaldes, når brugeren her har ændret spiltilstanden (til fjernbetjening). */
+  onLocalChange?: (g: GameState) => void;
 }
 
 const Ctx = createContext<GameCtx | null>(null);
 
-export function GameProvider({ children }: { children: ReactNode }) {
+export function GameProvider({ children, persist = true, onLocalChange }: Props) {
   const content = useContent();
-  const [hist, setHist] = useState<History>(() => ({ past: [], present: sanitizeGame(readJson(GAME_KEY), content) }));
+  const [hist, setHist] = useState<History>(() => ({ past: [], present: persist ? sanitizeGame(readJson(GAME_KEY), content) : sanitizeGame(null, content) }));
+  const localPending = useRef(false);
+  const onLocal = useRef(onLocalChange);
+  useEffect(() => {
+    onLocal.current = onLocalChange;
+  }, [onLocalChange]);
   const contentRef = useRef(content);
   contentRef.current = content;
 
@@ -30,10 +45,21 @@ export function GameProvider({ children }: { children: ReactNode }) {
       first.current = false;
       return;
     }
-    writeJson(GAME_KEY, hist.present);
+    if (persist) writeJson(GAME_KEY, hist.present);
+  }, [hist.present, persist]);
+
+  // Lokale ændringer meldes videre (fx til fjernbetjeningen), når de er anvendt.
+  useEffect(() => {
+    if (localPending.current) {
+      localPending.current = false;
+      onLocal.current?.(hist.present);
+    }
   }, [hist.present]);
 
-  const update = useCallback((fn: (g: GameState) => GameState) => setHist((h) => pushState(h, fn(h.present))), []);
+  const update = useCallback((fn: (g: GameState) => GameState) => {
+    localPending.current = true;
+    setHist((h) => pushState(h, fn(h.present)));
+  }, []);
   const updateStage = useCallback(
     (n: number, fn: (s: StageState) => StageState) =>
       update((g) => {
@@ -43,12 +69,18 @@ export function GameProvider({ children }: { children: ReactNode }) {
       }),
     [update],
   );
-  const undo = useCallback(() => setHist(undoHistory), []);
+  const undo = useCallback(() => {
+    localPending.current = true;
+    setHist(undoHistory);
+  }, []);
+  const applyExternal = useCallback((g: GameState, opts?: { history?: boolean }) => {
+    setHist((h) => (opts?.history ? pushState(h, g) : { past: h.past, present: g }));
+  }, []);
   const resetGame = useCallback(() => update((g) => ({ ...g, stages: {}, classificationTieOrder: {} })), [update]);
 
   const value = useMemo(
-    () => ({ game: hist.present, canUndo: hist.past.length > 0, update, updateStage, undo, resetGame }),
-    [hist, update, updateStage, undo, resetGame],
+    () => ({ game: hist.present, canUndo: hist.past.length > 0, update, updateStage, undo, resetGame, applyExternal }),
+    [hist, update, updateStage, undo, resetGame, applyExternal],
   );
   return <Ctx.Provider value={value}>{children}</Ctx.Provider>;
 }

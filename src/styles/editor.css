@@ -287,3 +287,36 @@
   font-weight: 400;
   color: #555b78;
 }
+
+/* Fjernbetjening i opsætningen */
+.remote-setup {
+  display: flex;
+  gap: 18px;
+  align-items: flex-start;
+  flex-wrap: wrap;
+}
+.remote-qr {
+  flex: none;
+  border: 3px solid var(--navy);
+  box-shadow: 4px 4px 0 var(--navy);
+  line-height: 0;
+}
+.remote-status {
+  font-weight: 700;
+  margin: 0 0 6px;
+}
+.dot {
+  display: inline-block;
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  background: #9aa0b8;
+  vertical-align: middle;
+}
+.dot.st-open {
+  background: var(--green);
+}
+.dot.st-connecting,
+.dot.st-closed {
+  background: var(--yellow);
+}
