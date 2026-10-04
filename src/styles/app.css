@@ -1,0 +1,193 @@
+/* Præsentationsmotor: scene, overgange, kontroller, oversigt. */
+
+.scene-viewport {
+  position: fixed;
+  inset: 0;
+  overflow: hidden;
+  background: #0b0e1c;
+}
+
+.scene {
+  position: absolute;
+  left: 0;
+  top: 0;
+  transform-origin: 0 0;
+  overflow: hidden;
+  background: var(--paper);
+}
+
+.slide-anim {
+  position: absolute;
+  inset: 0;
+  animation: slide-in var(--fade-ms) ease-out both;
+}
+.slide-anim.from-right {
+  --dx: 24px;
+}
+.slide-anim.from-left {
+  --dx: -24px;
+}
+@keyframes slide-in {
+  from {
+    opacity: 0;
+    transform: translateX(var(--dx, 0));
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+.overlay-in {
+  animation: fade-in var(--fade-ms) ease-out both;
+}
+@keyframes fade-in {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+/* Diskret progress-indikator nederst på scenen */
+.progress {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  height: 6px;
+  background: rgba(29, 35, 64, 0.12);
+  z-index: 30;
+}
+.progress-fill {
+  height: 100%;
+  background: var(--red);
+  opacity: 0.75;
+  transition: width var(--fade-ms) ease-out;
+}
+
+.hide-cursor {
+  cursor: none;
+}
+
+/* Kontroller: kun synlige når musen bevæges */
+.controls {
+  position: fixed;
+  right: 16px;
+  bottom: 18px;
+  display: flex;
+  gap: 6px;
+  align-items: center;
+  padding: 6px;
+  background: rgba(29, 35, 64, 0.92);
+  border: 2px solid var(--paper);
+  box-shadow: 4px 4px 0 #0b0e1c;
+  color: var(--paper);
+  font-size: 14px;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 200ms;
+  z-index: 100;
+}
+.show-chrome .controls {
+  opacity: 1;
+  pointer-events: auto;
+}
+.controls-count {
+  padding: 0 8px;
+  font-variant-numeric: tabular-nums;
+}
+.ctrl {
+  background: var(--navy2);
+  border: none;
+  color: var(--paper);
+  padding: 6px 12px;
+  min-width: 34px;
+  font-size: 15px;
+  font-weight: 700;
+  cursor: pointer;
+}
+.ctrl:hover,
+.ctrl:focus-visible {
+  background: var(--yellow);
+  color: var(--navy);
+  outline: none;
+}
+
+/* Oversigt (O) */
+.overview {
+  position: fixed;
+  inset: 0;
+  background: rgba(11, 14, 28, 0.94);
+  overflow-y: auto;
+  z-index: 200;
+  padding: 32px;
+  animation: fade-in var(--fade-ms) ease-out both;
+}
+.overview-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  gap: 22px;
+  max-width: 1800px;
+  margin: 0 auto;
+}
+.overview-item {
+  background: none;
+  border: 3px solid transparent;
+  padding: 0;
+  cursor: pointer;
+  text-align: left;
+  color: var(--paper);
+}
+.overview-item:hover,
+.overview-item:focus-visible {
+  border-color: var(--yellow);
+  outline: none;
+}
+.overview-item.current {
+  border-color: var(--red);
+}
+.overview-label {
+  display: block;
+  padding: 6px 4px;
+  font-size: 14px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* Modal (hjælp m.m.) – funktionel, men i paletten */
+.modal-backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(11, 14, 28, 0.7);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 300;
+  animation: fade-in var(--fade-ms) ease-out both;
+}
+.modal {
+  background: var(--paper);
+  color: var(--navy);
+  border: 4px solid var(--navy);
+  box-shadow: 8px 8px 0 #0b0e1c;
+  padding: 28px 32px;
+  max-width: min(720px, 94vw);
+  max-height: 90vh;
+  overflow: auto;
+}
+.help-table td {
+  padding: 6px 14px 6px 0;
+  font-size: 16px;
+}
+kbd {
+  display: inline-block;
+  background: var(--navy);
+  color: var(--yellow);
+  padding: 2px 8px;
+  font-family: var(--body);
+  font-weight: 700;
+  font-size: 14px;
+}

@@ -1,0 +1,9 @@
+node_modules
+dist
+*.local
+.wrangler
+# Rytterfotos og backups må aldrig committes
+backup*.json
+le-tur-backup*.json
+photos/
+test-results/

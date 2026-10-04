@@ -1,0 +1,169 @@
+@import '@fontsource-variable/fraunces/standard-italic.css';
+
+:root {
+  --navy: #1d2340;
+  --navy2: #34407a;
+  --paper: #f3e9d2;
+  --yellow: #f2b705;
+  --red: #d2372b;
+  --green: #2f9d58;
+  --white: #ffffff;
+
+  --head: 'Fraunces Variable', 'Fraunces', Georgia, 'Times New Roman', serif;
+  --body: Arial, 'Helvetica Neue', Helvetica, system-ui, sans-serif;
+
+  /* Hårde, forskudte skygger – ingen blur */
+  --shadow-lg: 12px 12px 0 var(--navy);
+  --shadow: 8px 8px 0 var(--navy);
+  --shadow-sm: 5px 5px 0 var(--navy);
+  --border: 5px solid var(--navy);
+
+  --fade-ms: 220ms;
+}
+
+/* Fraunces med lav optisk størrelse: kraftigere streger, plakat-agtigt */
+.h-title,
+.h-display,
+.num {
+  font-variation-settings: 'opsz' 24;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html,
+body,
+#root {
+  margin: 0;
+  height: 100%;
+  overflow: hidden;
+  background: #0b0e1c;
+  color: var(--navy);
+  font-family: var(--body);
+}
+
+button {
+  font: inherit;
+  color: inherit;
+}
+
+/* ---------- Typografi (på 1920×1080-scenen) ---------- */
+
+.h-title {
+  font-family: var(--head);
+  font-style: italic;
+  font-weight: 800;
+  font-size: 80px;
+  line-height: 1.05;
+  margin: 0;
+  letter-spacing: -0.01em;
+}
+
+.h-display {
+  font-family: var(--head);
+  font-style: italic;
+  font-weight: 800;
+  margin: 0;
+  line-height: 1;
+}
+
+.kicker {
+  font-family: var(--body);
+  font-weight: 700;
+  font-size: 22px;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  margin: 0;
+}
+
+.lead {
+  font-family: var(--body);
+  font-style: italic;
+  font-size: 30px;
+  margin: 0;
+}
+
+.body {
+  font-family: var(--body);
+  font-size: 30px;
+  line-height: 1.35;
+  margin: 0;
+}
+
+.num {
+  font-family: var(--head);
+  font-style: italic;
+  font-weight: 800;
+}
+
+/* ---------- Scene-baggrunde ---------- */
+
+.bg-paper {
+  background: var(--paper);
+  color: var(--navy);
+}
+.bg-navy {
+  background: var(--navy);
+  color: var(--paper);
+}
+.bg-yellow {
+  background: var(--yellow);
+  color: var(--navy);
+}
+
+.c-red {
+  color: var(--red);
+}
+.c-yellow {
+  color: var(--yellow);
+}
+.c-paper {
+  color: var(--paper);
+}
+.c-navy {
+  color: var(--navy);
+}
+
+/* Fælles rammer for indholdsslides */
+.slide {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+}
+
+.slide-head {
+  position: absolute;
+  left: 86px;
+  top: 76px;
+  right: 86px;
+}
+
+.slide-footer {
+  position: absolute;
+  left: 86px;
+  right: 100px;
+  bottom: 40px;
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  font-family: var(--body);
+  font-size: 20px;
+}
+.slide-footer .brand {
+  font-weight: 700;
+  letter-spacing: 0.22em;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  :root {
+    --fade-ms: 0ms;
+  }
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
