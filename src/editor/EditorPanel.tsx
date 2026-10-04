@@ -3,6 +3,7 @@ import { useContentCtx, type PersonRef } from '../content/ContentContext';
 import { MAX_RIDERS, MIN_RIDERS } from '../content/edits';
 import { cropPhoto } from '../content/photoCrop';
 import { usePhotoUrl } from '../content/photos';
+import { photosArePersistent } from '../content/photoStore';
 import type { Person } from '../content/types';
 
 interface Props {
@@ -25,6 +26,10 @@ export function EditorPanel({ target, onClose, onAdded, onOpenSetup }: Props) {
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [dragOver, setDragOver] = useState(false);
+  const [persistent, setPersistent] = useState(true);
+  useEffect(() => {
+    void photosArePersistent().then(setPersistent);
+  }, []);
   const fileRef = useRef<HTMLInputElement>(null);
   const firstRef = useRef<HTMLInputElement>(null);
   const photoUrl = usePhotoUrl(person?.photo);
@@ -103,6 +108,12 @@ export function EditorPanel({ target, onClose, onAdded, onOpenSetup }: Props) {
             )}
             <p className="hint">Eller træk et billede herind. Det beskæres til rammen og gemmes kun i denne browser.</p>
             {error && <p className="error">{error}</p>}
+            {!persistent && (
+              <p className="error">
+                Denne browser kan ikke gemme fotos permanent (fx privat vindue). Fotos forsvinder ved genindlæsning – brug Chrome/Edge, eller eksportér en
+                backup.
+              </p>
+            )}
           </div>
           <input ref={fileRef} type="file" accept="image/*" hidden onChange={(e) => void handleFile(e.target.files?.[0])} />
         </section>
