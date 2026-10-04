@@ -46,7 +46,10 @@ export function QuizBoard({ used, onCell }: BoardProps) {
                 key={ri}
                 type="button"
                 disabled={!onCell}
-                onClick={() => onCell?.(ci, ri)}
+                onClick={(e) => {
+                  e.currentTarget.blur();
+                  onCell?.(ci, ri);
+                }}
                 style={{
                   height: 84,
                   background: isUsed ? 'transparent' : 'var(--navy2)',

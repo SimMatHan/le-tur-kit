@@ -20,7 +20,7 @@ export function StageRouteSlide({ page, stage }: SlideProps & { stage: number })
       content={content}
       page={page}
       action={
-        <button type="button" className="run-stage chrome-only" onClick={() => openPanel(stage)}>
+        <button type="button" className="run-stage chrome-only" onClick={(e) => (e.currentTarget.blur(), openPanel(stage))}>
           ▶ Kør etapen
         </button>
       }

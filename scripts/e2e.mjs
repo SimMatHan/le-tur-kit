@@ -8,6 +8,7 @@ import { existsSync, mkdtempSync, readFileSync, rmSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join, resolve } from 'node:path';
 import { pathToFileURL } from 'node:url';
+import { fullRun, riders } from './fixtures.mjs';
 
 const url = pathToFileURL(resolve('dist/index.html')).href;
 const executablePath = process.env.CHROMIUM_PATH || (existsSync('/opt/pw-browsers/chromium') ? '/opt/pw-browsers/chromium' : undefined);
@@ -165,8 +166,6 @@ await step('Import genskaber indhold og foto', async () => {
 });
 
 await step('Kommissæren kører alle 5 etaper via panelerne (samme resultat som håndregningen)', async () => {
-  const names = ['Anna', 'Bent', 'Carl', 'Dorte', 'Erik', 'Frida'];
-  const riders = names.map((name, i) => ({ id: `r${i + 1}`, number: i + 1, name, nickname: '', bio: '', traits: [], photo: null }));
   await page.evaluate((c) => {
     localStorage.setItem('le-tur-2026:content', JSON.stringify(c));
     localStorage.removeItem('le-tur-2026:game');
@@ -304,34 +303,7 @@ await step('Kommissæren kører alle 5 etaper via panelerne (samme resultat som 
 
 await step('Klassement, stilling og podie viser resultater fra spiltilstanden (fuldt løb med 6 ryttere)', async () => {
   // Samme løb som håndregningen i src/game/scoring.test.ts (a–f = r1–r6).
-  const names = ['Anna', 'Bent', 'Carl', 'Dorte', 'Erik', 'Frida'];
-  const riders = names.map((name, i) => ({ id: `r${i + 1}`, number: i + 1, name, nickname: '', bio: '', traits: [], photo: null }));
-  const m = (o) => Object.fromEntries(Object.entries(o).map(([k, v]) => [`r${'abcdef'.indexOf(k) + 1}`, v]));
-  const id = (k) => `r${'abcdef'.indexOf(k) + 1}`;
-  const st = (input) => ({ status: 'finished', input, adjust: {}, tieOrder: [] });
-  const gameState = {
-    version: 1,
-    classificationTieOrder: {},
-    stages: {
-      1: st({ type: 'prolog', times: m({ a: 8.4, b: 10.1, c: 7.9, d: 12, e: 9.5, f: 15.2 }) }),
-      2: st({ type: 'sprint', order: ['b', 'a', 'f', 'c', 'e', 'd'].map(id), carrotGroups: [], bonuses: { start: id('f'), third: id('d') } }),
-      3: st({
-        type: 'udbrud',
-        quiz: { '0-0': ['a', 'b', 'c'].map(id), '0-4': [id('a')], '2-3': ['c', 'd'].map(id), '4-2': [id('e')] },
-        dice: m({ a: 0, b: 4.2, c: 12.5, d: 2, e: 7.7, f: 20 }),
-      }),
-      4: st({ type: 'bjerg', hits: ['b', 'e'].map(id), dice: m({ b: 7, e: 11 }), times: m({ a: 9, b: 14, c: 8, d: 11.5, e: 16, f: 10 }) }),
-      5: st({
-        type: 'champs',
-        hits: ['a', 'c', 'd', 'f'].map(id),
-        vinokourovDice: null,
-        rounds: [
-          { duels: [{ a: id('a'), b: id('c'), winner: id('c') }, { a: id('d'), b: id('f'), winner: id('d') }] },
-          { duels: [{ a: id('c'), b: id('d'), winner: id('d') }] },
-        ],
-      }),
-    },
-  };
+  const gameState = fullRun();
   await page.evaluate(
     ([c, g]) => {
       localStorage.setItem('le-tur-2026:content', JSON.stringify(c));

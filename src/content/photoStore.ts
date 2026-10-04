@@ -47,6 +47,11 @@ const idOf = (key: string) => key.replace(/^idb:/, '');
 // crypto.randomUUID kræver "secure context" – brug en simpel id-generator, der også virker på file://.
 const randomId = () => Date.now().toString(36) + Math.random().toString(36).slice(2, 10);
 
+/** Gemmes fotos permanent (IndexedDB), eller kun i hukommelsen indtil siden lukkes? */
+export async function photosArePersistent(): Promise<boolean> {
+  return (await openDb()) !== null;
+}
+
 export async function putPhoto(blob: Blob, key = 'idb:' + randomId()): Promise<string> {
   memory.set(key, blob);
   await tx('readwrite', (s) => s.put(blob, idOf(key)));

@@ -5,16 +5,26 @@ import { useStandings } from '../game/GameContext';
 import type { SlideProps } from './types';
 
 export function StandingsSlide({ page, afterStage }: SlideProps & { afterStage: number }) {
-  const { stages } = useContent();
+  const { stages, riders } = useContent();
   const standings = useStandings(afterStage);
   const stage = stages.find((s) => s.n === afterStage);
+  const result = standings.stageResults.find((r) => r.n === afterStage);
+  const counted = standings.countedStages.includes(afterStage);
+  const winners = counted ? (result?.rows.filter((r) => r.place === 1).map((r) => riders.find((x) => x.id === r.riderId)?.name) ?? []) : [];
   return (
     <div className="slide bg-paper">
       <div className="slide-head">
         <h1 className="h-title">Stillingen efter etape {afterStage}</h1>
         <p className="lead" style={{ marginTop: 30 }}>
           {stage?.name}
-          {!standings.countedStages.includes(afterStage) && ' · resultaterne er ikke indtastet endnu'}
+          {!counted && ' · resultaterne er ikke indtastet endnu'}
+          {winners.length > 0 && (
+            <>
+              {' · '}
+              {winners.length > 1 ? 'Delt etapesejr' : 'Etapevinder'}: <strong>{winners.join(' & ')}</strong>
+            </>
+          )}
+          {counted && result && !result.complete && ' · foreløbigt (etapen mangler data)'}
         </p>
       </div>
       <StandingsBoard standings={standings} top={270} />

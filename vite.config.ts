@@ -16,5 +16,7 @@ export default defineConfig({
   test: {
     include: ['src/**/*.test.ts'],
     environment: 'node',
+    // Testene er rene funktioner uden delt tilstand – genbrug workers.
+    isolate: false,
   },
 });
