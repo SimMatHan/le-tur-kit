@@ -10,6 +10,8 @@ export interface DeckEntry {
   component: ComponentType<any>;
   props?: Record<string, unknown>;
   each?: 'rider';
+  /** Sliden kan redigeres med E (rytter-slides kan altid). */
+  edit?: 'commissioner';
 }
 
 export interface SlideInstance {
@@ -17,6 +19,8 @@ export interface SlideInstance {
   title: string;
   Component: ComponentType<SlideProps & Record<string, unknown>>;
   props: Record<string, unknown>;
+  /** Hvem E redigerer på denne slide: "commissioner" eller en rytters id. */
+  editTarget?: string;
 }
 
 /** Folder decket ud til konkrete slides ud fra det aktuelle indhold (fx antal ryttere). */
@@ -30,10 +34,11 @@ export function expandDeck(deck: DeckEntry[], content: Content): SlideInstance[]
           title: `${e.title} ${r.number} – ${r.name}`,
           Component: e.component,
           props: { ...e.props, riderId: r.id },
+          editTarget: r.id,
         });
       }
     } else {
-      out.push({ key: e.id, title: e.title, Component: e.component, props: { ...e.props } });
+      out.push({ key: e.id, title: e.title, Component: e.component, props: { ...e.props }, editTarget: e.edit });
     }
   }
   return out;

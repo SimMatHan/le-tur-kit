@@ -14,8 +14,9 @@ function useViewport() {
 }
 
 /** Fast 1920×1080-lærred, der skaleres til vinduet med letterbox. */
-export function Scene({ children }: { children: ReactNode }) {
-  const { w, h } = useViewport();
+export function Scene({ children, reserveRight = 0 }: { children: ReactNode; reserveRight?: number }) {
+  const { w: vw, h } = useViewport();
+  const w = Math.max(200, vw - reserveRight);
   const scale = Math.min(w / SCENE_W, h / SCENE_H);
   const left = (w - SCENE_W * scale) / 2;
   const top = (h - SCENE_H * scale) / 2;

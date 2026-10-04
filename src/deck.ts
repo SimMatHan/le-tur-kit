@@ -20,7 +20,7 @@ export const deck: DeckEntry[] = [
   { id: 'pointskala', title: 'Pointskalaen', component: PointsScaleSlide },
   { id: 'ryttere', title: 'Årets ryttere', component: RidersIntroSlide },
   { id: 'rytter', title: 'Rytter', component: RiderPresentationSlide, each: 'rider' },
-  { id: 'kommissaer', title: 'Løbskommissæren', component: CommissionerSlide },
+  { id: 'kommissaer', title: 'Løbskommissæren', component: CommissionerSlide, edit: 'commissioner' },
 
   { id: 'etape-1', title: 'Etape 1: Prolog', component: StageDividerSlide, props: { stage: 1 } },
   { id: 'rute-1', title: 'Ruten: Prolog', component: StageRouteSlide, props: { stage: 1 } },

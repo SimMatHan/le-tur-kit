@@ -4,6 +4,7 @@ import type { StandingsView } from '../game/useStandings';
 import { HardShadowCard } from './HardShadowCard';
 import { JerseyBadge } from './JerseyBadge';
 import { formatGap, formatTime } from '../game/format';
+import { FitText } from './FitText';
 
 const cols: { id: JerseyId; title: string }[] = [
   { id: 'gul', title: 'Samlet tid' },
@@ -25,7 +26,7 @@ export function StandingsBoard({ standings, top = 250 }: { standings: StandingsV
         const rows = standings.tables[c.id];
         const leaderValue = rows[0]?.value;
         return (
-          <HardShadowCard key={c.id} tone="white" shadow="lg" style={{ flex: 1, padding: '30px 30px 24px' }}>
+          <HardShadowCard key={c.id} tone="white" shadow="lg" style={{ flex: 1, minWidth: 0, padding: '30px 30px 24px' }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: 16, marginBottom: 14 }}>
               <JerseyBadge jersey={c.id} size={56} />
               <span className="kicker c-red" style={{ fontSize: 22 }}>
@@ -47,9 +48,9 @@ export function StandingsBoard({ standings, top = 250 }: { standings: StandingsV
                 <span className="num c-red" style={{ width: 52, fontSize: fs + 6 }}>
                   {empty ? '–' : `${r.rank}.`}
                 </span>
-                <span style={{ flex: 1, minWidth: 0, fontWeight: 700, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                <FitText max={fs} min={14} style={{ flex: 1, minWidth: 0, height: rowH - 4, fontWeight: 700, whiteSpace: 'nowrap', display: 'flex', alignItems: 'center' }}>
                   {name(r.riderId)}
-                </span>
+                </FitText>
                 {!empty && r.rank === 1 && !r.tied && <JerseyBadge jersey={c.id} size={rowH - 18} />}
                 {!empty && r.tied && (
                   <span title="Uafgjort – afgøres af kommissæren" style={{ color: 'var(--red)', fontWeight: 700 }}>
