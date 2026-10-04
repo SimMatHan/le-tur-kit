@@ -28,12 +28,12 @@ export const deck: DeckEntry[] = [
 
   { id: 'etape-2', title: 'Etape 2: Sprint', component: StageDividerSlide, props: { stage: 2 } },
   { id: 'rute-2', title: 'Ruten: Sprinteretapen', component: StageRouteSlide, props: { stage: 2 } },
-  { id: 'carrot', title: 'Carrot in the Box', component: CarrotSlide },
+  { id: 'carrot', title: 'Carrot in the Box', component: CarrotSlide, stage: 2 },
   { id: 'stilling-2', title: 'Stilling efter etape 2', component: StandingsSlide, props: { afterStage: 2 } },
 
   { id: 'etape-3', title: 'Etape 3: Udbrud', component: StageDividerSlide, props: { stage: 3 } },
   { id: 'rute-3', title: 'Ruten: Udbrudsetapen', component: StageRouteSlide, props: { stage: 3 } },
-  { id: 'quiz', title: 'Musikquizzen', component: QuizBoardSlide },
+  { id: 'quiz', title: 'Musikquizzen', component: QuizBoardSlide, stage: 3 },
   { id: 'stilling-3', title: 'Stilling efter etape 3', component: StandingsSlide, props: { afterStage: 3 } },
 
   { id: 'etape-4', title: 'Etape 4: Bjerg', component: StageDividerSlide, props: { stage: 4 } },

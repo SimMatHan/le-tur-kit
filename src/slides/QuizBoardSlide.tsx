@@ -1,6 +1,8 @@
 import { useContent } from '../content/ContentContext';
 import { MusicIcon, PlayIcon } from '../components/icons';
 import type { SlideProps } from './types';
+import { useCommissioner } from '../commissioner/CommissionerContext';
+import { useGame } from '../game/GameContext';
 
 interface BoardProps {
   /** Brugte felter som "kategori-række", fx "0-2". */
@@ -69,8 +71,17 @@ export function QuizBoard({ used, onCell }: BoardProps) {
   );
 }
 
-export function QuizBoardSlide(_: SlideProps & BoardProps) {
-  const { quiz, meta } = useContent();
+export function QuizBoardSlide(_: SlideProps) {
+  const { quiz, meta, stages } = useContent();
+  const { game } = useGame();
+  const { openPanel, setProjector } = useCommissioner();
+  const quizStage = stages.find((s) => s.scoring.type === 'udbrud');
+  const st = quizStage ? game.stages[quizStage.n] : undefined;
+  const used = new Set(st?.input.type === 'udbrud' ? Object.keys(st.input.quiz) : []);
+  const onCell = (cat: number, row: number) => {
+    if (quizStage) openPanel(quizStage.n);
+    setProjector({ kind: 'quiz', cat, row, reveal: false });
+  };
   return (
     <div className="slide bg-navy">
       <div className="slide-head" style={{ top: 66 }}>
@@ -82,7 +93,7 @@ export function QuizBoardSlide(_: SlideProps & BoardProps) {
       <div style={{ position: 'absolute', right: 86, top: 62 }}>
         <MusicIcon size={120} />
       </div>
-      <QuizBoard used={_.used} onCell={_.onCell} />
+      <QuizBoard used={used} onCell={onCell} />
       <a
         href={meta.playlistUrl}
         target="_blank"
