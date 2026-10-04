@@ -1,0 +1,415 @@
+{
+  "meta": {
+    "title": "Le Tur (de France)",
+    "year": 2026,
+    "tagline": "5 etaper · 3 trøjer · 1 vinder",
+    "playlistUrl": "https://open.spotify.com/playlist/6BJoW3t6FTHHcNjCiJ3v1i",
+    "footer": "LE TUR (DE FRANCE) 2026",
+    "kicker": "Løbskommissærens officielle program",
+    "jerseysNote": "Reglerne for hver etape gennemgås inden start – de er forskellige fra etape til etape.",
+    "routeSubtitle": "Fra bajer i Prologen til brosten i Paris",
+    "pointsSubtitle": "Samme skala på alle etaper – kun trøjen skifter",
+    "ridersTagline": "{antal} ryttere. Fem etaper. Ingen nåde."
+  },
+  "theme": {
+    "navy": "#1D2340",
+    "navy2": "#34407A",
+    "paper": "#F3E9D2",
+    "yellow": "#F2B705",
+    "red": "#D2372B",
+    "green": "#2F9D58",
+    "headFont": "Fraunces (bold italic)",
+    "bodyFont": "Arial/system sans",
+    "motifs": [
+      "hårde forskudte skygger (5px navy, ingen blur)",
+      "runde 'medaljoner' med tal",
+      "duotone-fotos navy→rød→gul→papir med korn",
+      "prikket trøje-mønster"
+    ]
+  },
+  "jerseys": [
+    {
+      "id": "gul",
+      "name": "Den gule trøje",
+      "kicker": "SAMLET TID",
+      "text": "Alle etapetider lægges sammen. Laveste samlede tid efter fem etaper vinder Touren.",
+      "img": "img/j_gul.png",
+      "lowestWins": true
+    },
+    {
+      "id": "gron",
+      "name": "Den grønne trøje",
+      "kicker": "POINTKONKURRENCEN",
+      "text": "Point for placeringer og spurter. Flest point i Paris tager trøjen.",
+      "img": "img/j_gron.png"
+    },
+    {
+      "id": "prik",
+      "name": "Den prikkede trøje",
+      "kicker": "BJERGKONKURRENCEN",
+      "text": "Bjergpoint fra bjergetapen og bonusser undervejs. Flest bjergpoint vinder.",
+      "img": "img/j_prik.png"
+    }
+  ],
+  "rules": {
+    "placementPoints": [
+      25,
+      20,
+      15,
+      10,
+      5
+    ],
+    "pointsBeyondScale": 0,
+    "timePrecisionSec": 0.1,
+    "tieBreak": [
+      "stageWins",
+      "lastStagePlace",
+      "commissioner"
+    ],
+    "_tieBreakNote": "Lighed i en trøje: flest etapesejre, derefter bedst placeret på seneste etape, ellers afgør løbskommissæren."
+  },
+  "riders": [
+    {
+      "id": "r1",
+      "number": 1,
+      "name": "Fornavn Efternavn",
+      "nickname": "Kælenavnet fra Byen",
+      "bio": "Skriv 2–3 sætninger om rytteren her.",
+      "traits": [
+        "Egenskab",
+        "Egenskab",
+        "Egenskab"
+      ],
+      "photo": null
+    },
+    {
+      "id": "r2",
+      "number": 2,
+      "name": "Fornavn Efternavn",
+      "nickname": "Kælenavnet fra Byen",
+      "bio": "Skriv 2–3 sætninger om rytteren her.",
+      "traits": [
+        "Egenskab",
+        "Egenskab",
+        "Egenskab"
+      ],
+      "photo": null
+    },
+    {
+      "id": "r3",
+      "number": 3,
+      "name": "Fornavn Efternavn",
+      "nickname": "Kælenavnet fra Byen",
+      "bio": "Skriv 2–3 sætninger om rytteren her.",
+      "traits": [
+        "Egenskab",
+        "Egenskab",
+        "Egenskab"
+      ],
+      "photo": null
+    },
+    {
+      "id": "r4",
+      "number": 4,
+      "name": "Fornavn Efternavn",
+      "nickname": "Kælenavnet fra Byen",
+      "bio": "Skriv 2–3 sætninger om rytteren her.",
+      "traits": [
+        "Egenskab",
+        "Egenskab",
+        "Egenskab"
+      ],
+      "photo": null
+    },
+    {
+      "id": "r5",
+      "number": 5,
+      "name": "Fornavn Efternavn",
+      "nickname": "Kælenavnet fra Byen",
+      "bio": "Skriv 2–3 sætninger om rytteren her.",
+      "traits": [
+        "Egenskab",
+        "Egenskab",
+        "Egenskab"
+      ],
+      "photo": null
+    },
+    {
+      "id": "r6",
+      "number": 6,
+      "name": "Fornavn Efternavn",
+      "nickname": "Kælenavnet fra Byen",
+      "bio": "Skriv 2–3 sætninger om rytteren her.",
+      "traits": [
+        "Egenskab",
+        "Egenskab",
+        "Egenskab"
+      ],
+      "photo": null
+    }
+  ],
+  "commissioner": {
+    "name": "Simon Mathias Hansen",
+    "title": "Løbskommissær",
+    "nickname": "Den overnaturlige",
+    "bio": "Simon er en fuldstændig overnaturlig person. Er han overhovedet et menneske? Hvem ved. Men han er i hvert fald løbskommissær ved dette års Le Tur 2026 – og hans ord er lov.",
+    "traits": [
+      "Kan alt"
+    ],
+    "photo": "img/kommissaer.jpg"
+  },
+  "stages": [
+    {
+      "n": 1,
+      "id": "prolog",
+      "name": "Prolog",
+      "img": "img/e1.jpg",
+      "atStake": [
+        "gul",
+        "gron"
+      ],
+      "intro": "Prologen er den perfekte start på ethvert etapeløb. De stærkeste og mest kraftfulde ryttere får vist benene frem, og den stærkeste ender i førertrøjen. Og ikke nok med det: placeringerne tæller også i kampen om den grønne trøje.",
+      "steps": [
+        "Hver rytter får en bajer efter eget valg.",
+        "På startsignalet bundes bajeren. Tiden er rytterens første tid i kampen om den gule trøje.",
+        "Placeringen giver point til den grønne trøje."
+      ],
+      "scoring": {
+        "type": "prolog",
+        "placementPointsTo": "gron",
+        "timeToGul": true
+      },
+      "props": "Én bajer pr. rytter og et stopur.",
+      "shortName": "Prolog",
+      "tagline": "Bund en bajer",
+      "profile": "flad"
+    },
+    {
+      "n": 2,
+      "id": "sprint",
+      "name": "Sprinteretapen",
+      "img": "img/e2.jpg",
+      "atStake": [
+        "gul",
+        "gron",
+        "prik"
+      ],
+      "intro": "180 km efterfulgt af 20 km højintensitetskørsel – det er en sand sprinteretape. Her gælder det ikke kun om rå styrke, men i lige så høj grad om snilde, klogskab og snuhed. De mest eksplosive ryttere spilles op mod hinanden. Men hvem kommer stærkest ud af massen?",
+      "steps": [
+        "Hver rytter får et kort og satser på det, han tror kommer først i mål (hestevæddeløb med kort).",
+        "Uret starter, når det første kort er i mål. Derefter noteres rækkefølgen for resten af feltet.",
+        "Første kort ud af starthullerne: +10 point til den grønne trøje.",
+        "Første kort, der når det tredje kort: +10 bjergpoint."
+      ],
+      "scoring": {
+        "type": "sprint",
+        "placementPointsTo": "gron",
+        "placementTimePenaltySec": [
+          0,
+          3,
+          5,
+          7,
+          10
+        ],
+        "timePenaltyBeyondScale": "repeatLast",
+        "bonuses": [
+          {
+            "id": "start",
+            "label": "Første ud af starthullerne",
+            "jersey": "gron",
+            "points": 10
+          },
+          {
+            "id": "third",
+            "label": "Først til tredje kort",
+            "jersey": "prik",
+            "points": 10
+          }
+        ]
+      },
+      "note": "Har flere samme kort, afgøres placeringen med Carrot in the Box.",
+      "props": "Et spil kort.",
+      "shortName": "Sprint",
+      "tagline": "Hestevæddeløb med kort",
+      "profile": "flad"
+    },
+    {
+      "n": 3,
+      "id": "udbrud",
+      "name": "Udbrudsetapen",
+      "img": "img/e3.jpg",
+      "atStake": [
+        "gul",
+        "gron",
+        "prik"
+      ],
+      "intro": "En undervurderet etapeform, hvis I spørger mig. Her kræver det snilde som cykelekspert at spotte rytteren med de stærkeste ben. Rytterne har som regel forskellige dagsordener, og det kan være svært at lure, hvorfor lige præcis den rytter er i udbrud.",
+      "steps": [
+        "Avanceret musikquiz i fem kategorier. Sangene spilles fra playlisten.",
+        "Hvert rigtigt svar giver point efter feltets række: felt 1–3 giver 1 bjergpoint og felt 4–5 giver 2; felt 1–2 giver 1 point og felt 3–5 giver 2. I alt op til 35 bjergpoint og 40 point.",
+        "Hvert rigtigt svar giver også −3 sekunder på etapetiden.",
+        "Terningkast om tiden: uret starter, når den første slår en 6'er (han får 0 sek.). Hver ny rytter, der slår en 6'er, får sin tid.",
+        "Etapetid = terningtid minus quizsekunder. Laveste etapetid vinder etapen, og placeringen giver point til den grønne trøje."
+      ],
+      "scoring": {
+        "type": "udbrud",
+        "placementPointsTo": "gron",
+        "quizCorrectAnswerSec": -3,
+        "quizRowBjergpoint": [
+          1,
+          1,
+          1,
+          2,
+          2
+        ],
+        "quizRowPoint": [
+          1,
+          1,
+          2,
+          2,
+          2
+        ],
+        "quizMaxBjergpoint": 35,
+        "quizMaxPoint": 40,
+        "placementBy": "stageTime"
+      },
+      "props": "Højttaler, Spotify, terninger og stopur.",
+      "shortName": "Udbrud",
+      "tagline": "Musikquiz",
+      "profile": "kuperet"
+    },
+    {
+      "n": 4,
+      "id": "bjerg",
+      "name": "Bjergetapen",
+      "img": "img/e4.jpg",
+      "atStake": [
+        "gul",
+        "prik"
+      ],
+      "intro": "Hvorfor ser man cykling? Der findes ét svar: bjergetaper. Her afgøres etapeløb, når de stærkeste og mest letbenede ryttere finder hurtigst vej op ad utallige højdemeter. Men det kræver præcision, når angrebet skal sættes ind – og nok firepower til at stikke af fra konkurrenterne.",
+      "steps": [
+        "Alle skyder ét beerpong-skud. De der rammer, stikker af fra feltet.",
+        "Udbryderne slår med to terninger. Antal øjne = antal sekunders forspring på dem, der missede.",
+        "Alle bunder en bajer på tid. Udbryderne får deres forspring trukket fra tiden."
+      ],
+      "scoring": {
+        "type": "bjerg",
+        "placementPointsTo": "prik",
+        "breakawayDiceSubtractSec": true
+      },
+      "props": "Beerpong-kop og bold, to terninger, én bajer pr. rytter og et stopur.",
+      "shortName": "Bjerg",
+      "tagline": "Beerpong + bajer",
+      "profile": "bjerg"
+    },
+    {
+      "n": 5,
+      "id": "champs",
+      "name": "Champs-Élysées",
+      "img": "img/e5.jpg",
+      "atStake": [
+        "gul",
+        "gron"
+      ],
+      "intro": "Åh, drømmen for enhver rytter: at nå Paris i ét stykke. At se Champs-Élysées, de mange tusinde brosten, Triumfbuen og Eiffeltårnet. Men det er sidste etape og en flad en af slagsen – sidste chance for at vise, hvem der er stærkest i en spurt. Eller bliver det et Vinokourov-mirakel?",
+      "steps": [
+        "Alle tager ét beerpong-skud. De der rammer, går videre til knock-out i Carrot in the Box. Rammer ingen, skyder alle igen.",
+        "Rammer kun én rytter, sker der et Vinokourov-mirakel: han har snydt feltet og kører alene mod mål.",
+        "Knock-out-placeringen giver bonussekunder og point til den grønne trøje. Tabere i samme runde deler placeringen."
+      ],
+      "vinokourov": "Den eneste, der ramte, slår med to terninger. Antallet af øjne trækkes fra hans tid, og han vinder etapen.",
+      "scoring": {
+        "type": "champs",
+        "placementPointsTo": "gron",
+        "knockoutBonusSec": [
+          -10,
+          -6,
+          -4
+        ],
+        "_knockoutBonusNote": "Vinder, finaletaber, tabere i runden før finalen. Andre: 0 sek.",
+        "vinokourovDiceSubtractSec": true
+      },
+      "props": "Beerpong-kop og bold, to kopper og en terning, to terninger.",
+      "shortName": "Champs-Élysées",
+      "tagline": "Beerpong + Carrot in the Box",
+      "profile": "flad"
+    }
+  ],
+  "carrotInTheBox": {
+    "usedFor": "Uafgjorte placeringer og knock-out-finalen på Champs-Élysées",
+    "steps": [
+      "To ryttere sidder over for hinanden med hver sin kop foran sig. Kopperne må ikke være gennemsigtige.",
+      "Under den ene kop ligger en terning. Den kop vil ingen ende med.",
+      "Løbskommissæren blander kopperne, mens begge ryttere kigger væk.",
+      "En tredje rytter udpeger, hvem af de to der må kigge under sin kop.",
+      "Den der kiggede, prøver nu at overtale modstanderen til enten at bytte eller beholde.",
+      "Modstanderen bestemmer: byt eller behold. Den der ender med terningen, taber duellen."
+    ],
+    "subtitle": "Afgør uafgjorte placeringer – og knock-out-finalen på Champs-Élysées"
+  },
+  "quiz": {
+    "orderNote": "Sangene i playlisten følger brættet: øverst til venstre først, derefter ned gennem hver kategori.",
+    "categories": [
+      {
+        "name": "Sportsevent",
+        "prompt": "Hvilket sportsevent er musikken fra?",
+        "answers": [
+          "For Evigt – Volbeat (Håndbold-VM 2019)",
+          "Waka Waka – Shakira (VM 2010)",
+          "Wavin' Flag – K'NAAN (VM 2010)",
+          "Jump – Van Halen (BIF-indløb)",
+          "This One's For You – David Guetta ft. Zara Larsson (EM 2016)"
+        ]
+      },
+      {
+        "name": "Danish Remix",
+        "prompt": "Gæt dansk kunstner og udenlandsk sang",
+        "answers": [
+          "Johnson Shorty × Earth, Wind & Fire (September)",
+          "Benal × Bruno Mars (Treasure)",
+          "Emil Stabil × Mr. President (Coco Jamboo)",
+          "Lord Siva × Haddaway (What Is Love)",
+          "Kidd × Ed Sheeran (Shape of You)"
+        ]
+      },
+      {
+        "name": "Tag med på tur",
+        "prompt": "Gæt by, sted eller land",
+        "answers": [
+          "From Paris to Berlin – Infernal",
+          "Africa – Toto",
+          "Amsterdam – Nephew",
+          "Viva Las Vegas – Elvis Presley",
+          "Pompeii – Bastille"
+        ]
+      },
+      {
+        "name": "Meme & TikTok",
+        "prompt": "Gæt meme- eller TikTok-sangen",
+        "answers": [
+          "Baby Shark – Pinkfong",
+          "Savage – Megan Thee Stallion",
+          "Money Trees – Kendrick Lamar",
+          "Say So – Doja Cat",
+          "Freaks – Timmy Trumpet"
+        ]
+      },
+      {
+        "name": "Featuring!",
+        "prompt": "Gæt hvem der er med",
+        "answers": [
+          "DJ Got Us Fallin' In Love – Usher [Pitbull]",
+          "Empire State of Mind – Jay-Z [Alicia Keys]",
+          "Hospital (Live) – Nephew [L.O.C.]",
+          "Under Pressure – Queen [David Bowie]",
+          "Lose Yourself to Dance – Daft Punk [Pharrell Williams]"
+        ]
+      }
+    ]
+  },
+  "podium": {
+    "title": "Podiet i Paris",
+    "kicker": "Samlet stilling · Den gule trøje"
+  }
+}
