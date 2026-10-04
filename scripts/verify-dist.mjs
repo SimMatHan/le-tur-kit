@@ -6,12 +6,19 @@ const html = readFileSync('dist/index.html', 'utf8');
 const problems = [];
 
 // Kun disse eksterne adresser må forekomme (navnerum, Reacts fejl-links og playlisten som almindeligt link).
-const allowed = [/^https?:\/\/www\.w3\.org\//, /^https:\/\/react\.dev\/errors\//, /^https:\/\/open\.spotify\.com\/playlist\//];
+// Eksempel-adresser i hjælpetekster til fjernbetjeningen (relæet indtastes af brugeren) er også ok.
+const allowed = [
+  /^https?:\/\/www\.w3\.org\//,
+  /^https:\/\/react\.dev\/errors\//,
+  /^https:\/\/open\.spotify\.com\/playlist\//,
+  /^https:\/\/le-tur-2026\.([a-z-]+\.workers\.dev)?$/,
+];
 for (const url of new Set(html.match(/https?:\/\/[^\s"'`)<>]+/g) ?? [])) {
   if (!allowed.some((re) => re.test(url))) problems.push(`Uventet ekstern adresse: ${url}`);
 }
 // Ingen eksterne ressourcer i tags
-for (const m of html.matchAll(/<(script|link|img|source)\b[^>]*\b(src|href)=["']([^"']+)["']/gi)) {
+// Ingen eksterne ressourcer i tags (JS-skabelonstrenge med ${…}/` er kode, ikke ressourcer)
+for (const m of html.matchAll(/<(script|link|img|source)\b[^>]*\b(src|href)=["']([^"'`$]+)["']/gi)) {
   if (!m[3].startsWith('data:') && !m[3].startsWith('#')) problems.push(`Ekstern ressource i <${m[1]}>: ${m[3]}`);
 }
 if (/<script[^>]+type=["']module["'][^>]*src=/i.test(html)) problems.push('Modul-script med src (virker ikke via file://)');

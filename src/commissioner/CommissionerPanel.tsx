@@ -9,6 +9,7 @@ import { SprintPanel } from './panels/SprintPanel';
 import { UdbrudPanel } from './panels/UdbrudPanel';
 import { ClassificationTies, ResultsTable } from './ResultsTable';
 import type { StageStatus } from '../game/types';
+import { emptyStageState } from '../game/scoring';
 import type { ComponentType } from 'react';
 
 const panels: Record<string, ComponentType<{ n: number }>> = {
@@ -21,11 +22,14 @@ const panels: Record<string, ComponentType<{ n: number }>> = {
 
 const statusLabel: Record<StageStatus, string> = { idle: 'Ikke startet', running: 'I gang', finished: 'Afsluttet' };
 
-/** Kommissærpanelet (K): én fane pr. etape + klassement. */
-export function CommissionerPanel() {
+/**
+ * Kommissærpanelet (K): én fane pr. etape + klassement.
+ * `embedded`: vises som hele siden (fjernbetjening på telefonen) i stedet for som sidepanel.
+ */
+export function CommissionerPanel({ embedded = false }: { embedded?: boolean }) {
   const { stages } = useContent();
-  const { stage: n, setStage, closePanel, setProjector } = useCommissioner();
-  const { canUndo, undo, updateStage } = useGame();
+  const { stage: n, setStage, closePanel, setProjector, projector, resetClock, clock } = useCommissioner();
+  const { canUndo, undo, updateStage, game } = useGame();
   const standings = useStandings();
   const [tab, setTab] = useState<'stage' | 'ties'>('stage');
   const bodyRef = useRef<HTMLDivElement>(null);
@@ -45,6 +49,16 @@ export function CommissionerPanel() {
     setProjector(null);
   };
 
+  const stageState = game.stages[stage.n];
+  const hasData = !!stageState && JSON.stringify(stageState) !== JSON.stringify(emptyStageState(stage));
+  const resetStage = () => {
+    if (!confirm(`Nulstil etape ${stage.n} (${stage.name})? Alle tider, placeringer og rettelser på etapen slettes. Kan fortrydes med Fortryd.`)) return;
+    updateStage(stage.n, () => emptyStageState(stage));
+    // Luk det, der hører til etapen, på skærmen, og stop uret.
+    if (projector && (projector.kind !== 'stopwatch' || projector.stage === stage.n)) setProjector(null);
+    if (clock.startedAt || clock.stoppedMs) resetClock();
+  };
+
   const onKeyDown = (e: KeyboardEvent) => {
     if (e.key === 'Escape') {
       const t = e.target as HTMLElement;
@@ -53,16 +67,18 @@ export function CommissionerPanel() {
   };
 
   return (
-    <aside className="editor commissioner" aria-label="Kommissærpanel" onKeyDown={onKeyDown}>
+    <aside className={`editor commissioner ${embedded ? 'embedded' : ''}`} aria-label="Kommissærpanel" onKeyDown={onKeyDown}>
       <header className="editor-head">
         <h2>Kommissær</h2>
         <div className="row">
           <button type="button" className="btn btn-small btn-ghost" disabled={!canUndo} onClick={undo} title="Fortryd seneste handling (Ctrl+Z)">
             ↶ Fortryd
           </button>
-          <button type="button" className="icon-btn" onClick={closePanel} aria-label="Luk (K)" title="Luk (K)">
-            ×
-          </button>
+          {!embedded && (
+            <button type="button" className="icon-btn" onClick={closePanel} aria-label="Luk (K)" title="Luk (K)">
+              ×
+            </button>
+          )}
         </div>
       </header>
       <nav className="stage-tabs" aria-label="Etaper">
@@ -116,6 +132,12 @@ export function CommissionerPanel() {
             <section className="panel-section">
               <h3>Etaperesultat (live)</h3>
               <ResultsTable result={result} />
+            </section>
+            <section className="panel-section danger-zone">
+              <button type="button" className="btn btn-small btn-danger" onClick={resetStage} disabled={!hasData}>
+                Nulstil etape {stage.n}
+              </button>
+              <span className="hint"> Sletter alle data på etapen og sætter den til "Ikke startet". Kan fortrydes.</span>
             </section>
           </>
         )}

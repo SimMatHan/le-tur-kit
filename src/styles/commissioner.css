@@ -760,3 +760,90 @@ button.duelist {
   font-size: 110px;
   animation: vino-pop 700ms 300ms cubic-bezier(0.2, 1.6, 0.4, 1) both;
 }
+
+.danger-zone {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+/* ---------- Telefonens fjernbetjening ---------- */
+.remote-app {
+  height: 100%;
+  overflow-y: auto;
+  background: var(--paper);
+  color: var(--navy);
+  font-size: 15px;
+  -webkit-text-size-adjust: 100%;
+}
+.remote-bar {
+  position: sticky;
+  top: 0;
+  z-index: 5;
+  background: var(--navy);
+  color: var(--paper);
+  padding: 10px 14px 8px;
+}
+.remote-bar strong {
+  font-family: var(--head);
+  font-style: italic;
+  font-size: 19px;
+  color: var(--yellow);
+}
+.remote-bar .muted {
+  color: #b9bfd8;
+}
+.remote-wait {
+  padding: 30px 16px;
+  font-size: 18px;
+}
+.remote-slides {
+  padding: 10px 14px;
+  border-bottom: 3px solid var(--navy);
+  background: #ece0c3;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.remote-slides select {
+  font: inherit;
+  font-size: 16px;
+  padding: 10px 8px;
+  border: 3px solid var(--navy);
+  background: #fff;
+  min-width: 0;
+}
+.remote-nav {
+  font-size: 26px;
+  min-width: 56px;
+  min-height: 48px;
+  padding: 0 10px;
+}
+.commissioner.embedded {
+  position: static;
+  width: auto;
+  height: auto;
+  border-left: none;
+  animation: none;
+}
+.commissioner.embedded .editor-body {
+  overflow: visible;
+}
+.remote-app .btn {
+  min-height: 40px;
+}
+.remote-app .split-grid,
+.remote-app .toggle-grid {
+  grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+}
+.remote-app .split-btn,
+.remote-app .toggle {
+  min-height: 58px;
+  font-size: 16px;
+}
+.remote-app input,
+.remote-app .time-input,
+.remote-app .num-input {
+  font-size: 16px !important; /* undgå zoom på iOS */
+}

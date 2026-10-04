@@ -1,0 +1,18 @@
+# Cloudflare Worker: relæ til fjernbetjening (telefon → skærm) + værtsside for appen.
+# Deploy: npm run deploy:remote   (bygger appen først, så dist/ kommer med)
+name = "le-tur-2026"
+main = "worker.ts"
+compatibility_date = "2026-09-01"
+
+# Appen (dist/index.html) serveres fra samme adresse, så telefonen kun skal bruge ét link.
+[assets]
+directory = "../dist"
+binding = "ASSETS"
+
+[[durable_objects.bindings]]
+name = "ROOMS"
+class_name = "Room"
+
+[[migrations]]
+tag = "v1"
+new_sqlite_classes = ["Room"]

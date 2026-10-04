@@ -1,3 +1,4 @@
+import { useEffect, useRef } from 'react';
 import { useContent } from '../../content/ContentContext';
 import { Stopwatch } from '../../components/Stopwatch';
 import { quizTotals } from '../../game/scoring';
@@ -16,6 +17,11 @@ export function UdbrudPanel({ n }: { n: number }) {
   const key = open ? cellKey(open.cat, open.row) : null;
   const totals = quizTotals(input, stage);
   const sc = stage.scoring.type === 'udbrud' ? stage.scoring : null;
+  // Vis det åbne kort (vigtigt på telefonen, hvor brættet fylder skærmen).
+  const cardRef = useRef<HTMLDivElement>(null);
+  useEffect(() => {
+    if (key) cardRef.current?.scrollIntoView?.({ block: 'nearest', behavior: 'smooth' });
+  }, [key]);
 
   const openCell = (cat: number, row: number) => setProjector({ kind: 'quiz', cat, row, reveal: false });
   const closeCard = () => {
@@ -68,7 +74,7 @@ export function UdbrudPanel({ n }: { n: number }) {
         </div>
 
         {open && key && (
-          <div className="quiz-card-panel">
+          <div className="quiz-card-panel" ref={cardRef}>
             <div className="row wrap">
               <strong className="grow">
                 {quiz.categories[open.cat].name} · felt {open.row + 1} · sang nr. {songNumber(counts, open.cat, open.row)}
