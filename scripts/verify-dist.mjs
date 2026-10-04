@@ -10,7 +10,6 @@ const problems = [];
 const allowed = [
   /^https?:\/\/www\.w3\.org\//,
   /^https:\/\/react\.dev\/errors\//,
-  /^https:\/\/open\.spotify\.com\/playlist\//,
   /^https:\/\/le-tur-2026\.([a-z-]+\.workers\.dev)?$/,
 ];
 for (const url of new Set(html.match(/https?:\/\/[^\s"'`)<>]+/g) ?? [])) {

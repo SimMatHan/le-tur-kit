@@ -3,7 +3,6 @@
     "title": "Le Tur (de France)",
     "year": 2026,
     "tagline": "5 etaper · 3 trøjer · 1 vinder",
-    "playlistUrl": "https://open.spotify.com/playlist/6BJoW3t6FTHHcNjCiJ3v1i",
     "footer": "LE TUR (DE FRANCE) 2026",
     "kicker": "Løbskommissærens officielle program",
     "jerseysNote": "Reglerne for hver etape gennemgås inden start – de er forskellige fra etape til etape.",
@@ -245,37 +244,22 @@
       ],
       "intro": "En undervurderet etapeform, hvis I spørger mig. Her kræver det snilde som cykelekspert at spotte rytteren med de stærkeste ben. Rytterne har som regel forskellige dagsordener, og det kan være svært at lure, hvorfor lige præcis den rytter er i udbrud.",
       "steps": [
-        "Avanceret musikquiz i fem kategorier. Sangene spilles fra playlisten.",
-        "Hvert rigtigt svar giver point efter feltets række: felt 1–3 giver 1 bjergpoint og felt 4–5 giver 2; felt 1–2 giver 1 point og felt 3–5 giver 2. I alt op til 35 bjergpoint og 40 point.",
-        "Hvert rigtigt svar giver også −3 sekunder på etapetiden.",
-        "Terningkast om tiden: uret starter, når den første slår en 6'er (han får 0 sek.). Hver ny rytter, der slår en 6'er, får sin tid.",
-        "Etapetid = terningtid minus quizsekunder. Laveste etapetid vinder etapen, og placeringen giver point til den grønne trøje."
+        "Én rytter ad gangen forsøger at stikke af. Der vendes et kort, og rytteren gætter, om det næste kort er højere eller lavere.",
+        "Hvert rigtigt gæt er en kilometer længere i udbrud: −2 sekunder på etapetiden og 1 bjergpoint. Højst 10 rigtige tæller.",
+        "Gætter rytteren forkert, er han hentet af feltet: han tager en slurk, og turen går videre. Es er højest, og samme værdi tæller som forkert.",
+        "Længste udbrud vinder etapen, og placeringen giver point til den grønne trøje. Ved lighed afgøres placeringen med Carrot in the Box."
       ],
       "scoring": {
         "type": "udbrud",
         "placementPointsTo": "gron",
-        "quizCorrectAnswerSec": -3,
-        "quizRowBjergpoint": [
-          1,
-          1,
-          1,
-          2,
-          2
-        ],
-        "quizRowPoint": [
-          1,
-          1,
-          2,
-          2,
-          2
-        ],
-        "quizMaxBjergpoint": 35,
-        "quizMaxPoint": 40,
-        "placementBy": "stageTime"
+        "secPerCorrect": -2,
+        "bjergpointPerCorrect": 1,
+        "maxCountedCorrect": 10,
+        "_note": "Placering efter længste udbrud (flest rigtige gæt i træk). Gæt ud over maxCountedCorrect tæller ikke."
       },
-      "props": "Højttaler, Spotify, terninger og stopur.",
+      "props": "Et spil kort – eller lad appen trække kortene.",
       "shortName": "Udbrud",
-      "tagline": "Musikquiz",
+      "tagline": "Højere/lavere",
       "profile": "kuperet"
     },
     {
@@ -347,66 +331,6 @@
       "Modstanderen bestemmer: byt eller behold. Den der ender med terningen, taber duellen."
     ],
     "subtitle": "Afgør uafgjorte placeringer – og knock-out-finalen på Champs-Élysées"
-  },
-  "quiz": {
-    "orderNote": "Sangene i playlisten følger brættet: øverst til venstre først, derefter ned gennem hver kategori.",
-    "categories": [
-      {
-        "name": "Sportsevent",
-        "prompt": "Hvilket sportsevent er musikken fra?",
-        "answers": [
-          "For Evigt – Volbeat (Håndbold-VM 2019)",
-          "Waka Waka – Shakira (VM 2010)",
-          "Wavin' Flag – K'NAAN (VM 2010)",
-          "Jump – Van Halen (BIF-indløb)",
-          "This One's For You – David Guetta ft. Zara Larsson (EM 2016)"
-        ]
-      },
-      {
-        "name": "Danish Remix",
-        "prompt": "Gæt dansk kunstner og udenlandsk sang",
-        "answers": [
-          "Johnson Shorty × Earth, Wind & Fire (September)",
-          "Benal × Bruno Mars (Treasure)",
-          "Emil Stabil × Mr. President (Coco Jamboo)",
-          "Lord Siva × Haddaway (What Is Love)",
-          "Kidd × Ed Sheeran (Shape of You)"
-        ]
-      },
-      {
-        "name": "Tag med på tur",
-        "prompt": "Gæt by, sted eller land",
-        "answers": [
-          "From Paris to Berlin – Infernal",
-          "Africa – Toto",
-          "Amsterdam – Nephew",
-          "Viva Las Vegas – Elvis Presley",
-          "Pompeii – Bastille"
-        ]
-      },
-      {
-        "name": "Meme & TikTok",
-        "prompt": "Gæt meme- eller TikTok-sangen",
-        "answers": [
-          "Baby Shark – Pinkfong",
-          "Savage – Megan Thee Stallion",
-          "Money Trees – Kendrick Lamar",
-          "Say So – Doja Cat",
-          "Freaks – Timmy Trumpet"
-        ]
-      },
-      {
-        "name": "Featuring!",
-        "prompt": "Gæt hvem der er med",
-        "answers": [
-          "DJ Got Us Fallin' In Love – Usher [Pitbull]",
-          "Empire State of Mind – Jay-Z [Alicia Keys]",
-          "Hospital (Live) – Nephew [L.O.C.]",
-          "Under Pressure – Queen [David Bowie]",
-          "Lose Yourself to Dance – Daft Punk [Pharrell Williams]"
-        ]
-      }
-    ]
   },
   "podium": {
     "title": "Podiet i Paris",

@@ -22,12 +22,28 @@ export interface SprintInput {
   bonuses: Record<string, RiderId | null | undefined>;
 }
 
+/** Et spillekort, fx "10♥" eller "A♠". */
+export type Card = string;
+export type Guess = 'op' | 'ned';
+
+/** Ét udbrudsforsøg (højere/lavere) trukket i appen. */
+export interface HighLowRun {
+  cards: Card[];
+  guesses: Guess[];
+  /** Forsøget er slut (forkert gæt eller loftet nået). */
+  done: boolean;
+}
+
 export interface UdbrudInput {
   type: 'udbrud';
-  /** Quizfelt "kategori-række" (0-baseret, fx "0-2") → ryttere, der svarede rigtigt. */
-  quiz: Record<string, RiderId[]>;
-  /** Terningtid: sekunder fra første 6'er (den første får 0). */
-  dice: Times;
+  /** Forsøg spillet i appen (kortene trækkes af appen). */
+  runs: Record<RiderId, HighLowRun>;
+  /** Antal rigtige tastet manuelt (fx ved rigtige kort). Går forud for runs. */
+  manual: Record<RiderId, number | null | undefined>;
+  /** Resten af kortbunken (blandet). Blandes på ny, når den er tom. */
+  deck: Card[];
+  /** Rytteren, der er i gang lige nu (vises på skærmen). */
+  active: RiderId | null;
 }
 
 export interface BjergInput {

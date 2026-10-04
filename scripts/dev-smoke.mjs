@@ -72,8 +72,9 @@ try {
   }
   await page.locator('.stage-tab', { hasText: 'Klassement' }).click();
   await page.locator('.stage-tab', { hasText: /^3/ }).click();
-  await page.locator('.mini-cell').first().click();
-  await page.getByRole('button', { name: 'Luk kort (marker brugt)' }).click();
+  await page.locator('.toggle').first().click();
+  await page.getByRole('button', { name: '▲ Højere' }).click();
+  await page.keyboard.press('Escape');
   await page.locator('.stage-tab', { hasText: /^1/ }).click();
   await page.getByRole('button', { name: 'Vis på skærm' }).first().click();
   await page.keyboard.press('Escape');

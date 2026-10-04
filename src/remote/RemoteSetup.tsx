@@ -23,7 +23,7 @@ export function RemoteSetup() {
     <section>
       <h3>Fjernbetjening (telefon)</h3>
       <p className="hint">
-        Styr slides og etaper fra din telefon – inkl. stopur og quiz med svar, som kun vises på telefonen. Kræver internet og relæet på Cloudflare (se
+        Styr slides og etaper fra din telefon – inkl. stopur og udbrudsforsøget (højere/lavere). Kræver internet og relæet på Cloudflare (se
         README: <code>npm run deploy:remote</code>).
       </p>
       {!config.active ? (

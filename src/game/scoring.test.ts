@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { computeStage, computeStandings, pointsForPlace, quizTotals, rankBy } from './scoring';
+import { computeStage, computeStandings, pointsForPlace, rankBy } from './scoring';
 import { baseContent, contentWith, game, riders, stageOf, stageState } from './testUtils';
 import type { StageResult } from './types';
 
@@ -117,45 +117,59 @@ describe('Etape 2 – Sprint', () => {
   });
 });
 
-describe('Etape 3 – Udbrud / musikquiz', () => {
+describe('Etape 3 – Udbrud (højere/lavere)', () => {
   const st = stageOf(3);
+  const run = (cards: string[], guesses: ('op' | 'ned')[], done = true) => ({ cards, guesses, done });
 
-  it('feltværdier efter række, −3 sek pr. rigtigt svar', () => {
-    const q = quizTotals({ type: 'udbrud', quiz: { '0-0': ['a', 'b'], '0-4': ['a'], '3-2': ['a'] }, dice: {} }, st);
-    expect(q.get('a')).toEqual({ correct: 3, prik: 1 + 2 + 1, gron: 1 + 2 + 2, t10: -90 });
-    expect(q.get('b')).toEqual({ correct: 1, prik: 1, gron: 1, t10: -30 });
+  it('længste udbrud vinder; −2 sek og 1 bjergpoint pr. rigtigt gæt', () => {
+    const res = computeStage(st, stageState(3, { manual: { a: 3, b: 5, c: 0 } }), riders(['a', 'b', 'c']), rules);
+    const r = by(res);
+    expect([r.b.place, r.a.place, r.c.place]).toEqual([1, 2, 3]);
+    expect([r.b.gron, r.a.gron, r.c.gron]).toEqual([25, 20, 15]);
+    expect([r.b.timeSec, r.a.timeSec, r.c.timeSec]).toEqual([-10, -6, 0]);
+    expect([r.b.prik, r.a.prik, r.c.prik]).toEqual([5, 3, 0]);
+    expect(res.complete).toBe(true);
   });
 
-  it('alle 25 felter rigtige giver præcis 35 bjergpoint og 40 point', () => {
-    const quiz: Record<string, string[]> = {};
-    for (let c = 0; c < 5; c++) for (let r = 0; r < 5; r++) quiz[`${c}-${r}`] = ['a'];
-    const q = quizTotals({ type: 'udbrud', quiz, dice: {} }, st).get('a')!;
-    expect(q.prik).toBe(35);
-    expect(q.gron).toBe(40);
-    expect(q.t10).toBe(-750);
+  it('højst 10 rigtige tæller (tid og bjergpoint), men placeringen bruger hele udbruddet', () => {
+    const res = computeStage(st, stageState(3, { manual: { a: 14, b: 12 } }), riders(['a', 'b']), rules);
+    const r = by(res);
+    expect(r.a).toMatchObject({ place: 1, timeSec: -20, prik: 10 });
+    expect(r.b).toMatchObject({ place: 2, timeSec: -20, prik: 10 });
+    expect(r.a.notes.join()).toContain('14 rigtige (10 tæller)');
   });
 
-  it('etapetid = terningtid − quizsekunder; laveste tid vinder etapen', () => {
+  it('forsøg spillet i appen tælles; et forsøg i gang mangler stadig', () => {
     const res = computeStage(
       st,
-      stageState(3, { quiz: { '0-0': ['b', 'b'], '4-4': ['b'] }, dice: { a: 0, b: 4.2, c: 12.5 } }),
+      stageState(3, {
+        runs: {
+          a: run(['5♠', '9♥', '2♣', 'K♦'], ['op', 'ned', 'ned']), // 2 rigtige, så forkert
+          b: run(['7♠', '7♥'], ['op']), // samme værdi = forkert → 0
+          c: run(['3♠', 'Q♥'], ['op'], false), // i gang
+        },
+      }),
       riders(['a', 'b', 'c']),
       rules,
     );
     const r = by(res);
-    expect(r.b.timeSec).toBe(-1.8);
-    expect(r.b.place).toBe(1);
-    expect(r.b.gron).toBe(25 + 1 + 2);
-    expect(r.b.prik).toBe(1 + 2);
-    expect(r.a.place).toBe(2);
-    expect(r.a.timeSec).toBe(0);
-    expect(r.c.gron).toBe(15);
+    expect(r.a).toMatchObject({ place: 1, prik: 2, timeSec: -4 });
+    expect(r.b).toMatchObject({ place: 2, prik: 0, timeSec: 0 });
+    expect(r.c.missing).toBe(true);
+    expect(res.complete).toBe(false);
   });
 
-  it('quizpoint tælles også for en rytter uden terningtid, men etapen er ufuldstændig', () => {
-    const res = computeStage(st, stageState(3, { quiz: { '1-1': ['c'] }, dice: { a: 0, b: 1 } }), riders(['a', 'b', 'c']), rules);
-    expect(by(res).c).toMatchObject({ missing: true, gron: 1, prik: 1, place: null });
-    expect(res.complete).toBe(false);
+  it('manuelt tal går forud for forsøget i appen', () => {
+    const res = computeStage(st, stageState(3, { runs: { a: run(['5♠', '9♥', '2♣'], ['op', 'op']) }, manual: { a: 6 } }), riders(['a']), rules);
+    expect(by(res).a.prik).toBe(6);
+  });
+
+  it('lige lange udbrud deler placeringen, indtil kommissæren afgør det', () => {
+    const tied = computeStage(st, stageState(3, { manual: { a: 2, b: 2, c: 1 } }), riders(['a', 'b', 'c']), rules);
+    expect(tied.ties).toEqual([['a', 'b']]);
+    expect(by(tied).a.gron).toBe(25);
+    const fixed = computeStage(st, stageState(3, { manual: { a: 2, b: 2, c: 1 } }, { tieOrder: ['b', 'a'] }), riders(['a', 'b', 'c']), rules);
+    expect([by(fixed).b.place, by(fixed).a.place]).toEqual([1, 2]);
   });
 });
 
@@ -376,36 +390,31 @@ describe('Klassement og lighed', () => {
 
 describe('Komplet testløb: 6 ryttere gennem alle 5 etaper (stemmer med håndregning)', () => {
   /*
-   * Håndregning (se tabellerne i kommentarerne):
+   * Håndregning:
    *
    * E1 Prolog – tider: a 8,4  b 10,1  c 7,9  d 12,0  e 9,5  f 15,2
    *   placering c, a, e, b, d, f → grøn c25 a20 e15 b10 d5 f0
    * E2 Sprint – rækkefølge b, a, f, c, e, d; bonus start=f (+10 grøn), tredje=d (+10 bjerg)
    *   grøn b25 a20 f15+10 c10 e5 d0 · tid b+0 a+3 f+5 c+7 e+10 d+10 · bjerg d10
-   * E3 Udbrud – quiz: 0-0 [a,b,c] (1/1), 0-4 [a] (2/2), 2-3 [c,d] (2/2), 4-2 [e] (bjerg 1/point 2)
-   *   quiz a: 3 bjerg, 3 point, −6s · b: 1, 1, −3s · c: 3, 3, −6s · d: 2, 2, −3s · e: 1, 2, −3s · f: 0
-   *   terning a 0  b 4,2  c 12,5  d 2,0  e 7,7  f 20,0
-   *   etapetid a −6,0  d −1,0  b 1,2  e 4,7  c 6,5  f 20,0
-   *   grøn a 25+3  d 20+2  b 15+1  e 10+2  c 5+3  f 0 · bjerg a3 b1 c3 d2 e1
+   * E3 Udbrud (højere/lavere) – rigtige i træk: a 3  b 2  c 5  d 1  e 4  f 0
+   *   placering c, e, a, b, d, f → grøn c25 e20 a15 b10 d5 f0
+   *   tid (−2 s pr. rigtigt) c −10  e −8  a −6  b −4  d −2  f 0 · bjerg c5 e4 a3 b2 d1 f0
    * E4 Bjerg – udbrydere b (7), e (11); bajer a 9,0 b 14,0 c 8,0 d 11,5 e 16,0 f 10,0
    *   etapetid a 9,0 b 7,0 c 8,0 d 11,5 e 5,0 f 10,0 → bjerg e25 b20 c15 a10 f5 d0
    * E5 Champs – ramte a, c, d, f; runde 1: c slår a, d slår f; finale: d slår c
    *   d 1. (−10s, 25) · c 2. (−6s, 20) · a og f delt 3. (−4s, 15)
    *
-   * Samlet tid:  a 8,4+3−6+9−4 = 10,4 · b 10,1+0+1,2+7 = 18,3 · c 7,9+7+6,5+8−6 = 23,4
-   *              d 12+10−1+11,5−10 = 22,5 · e 9,5+10+4,7+5 = 29,2 · f 15,2+5+20+10−4 = 46,2
-   * Grøn:        a 20+20+28+15 = 83 · b 10+25+16 = 51 · c 25+10+8+20 = 63
-   *              d 5+0+22+25 = 52 · e 15+5+12 = 32 · f 0+25+0+15 = 40
-   * Bjerg:       a 3+10 = 13 · b 1+20 = 21 · c 3+15 = 18 · d 10+2 = 12 · e 1+25 = 26 · f 5
+   * Samlet tid:  a 8,4+3−6+9−4 = 10,4 · b 10,1+0−4+7 = 13,1 · c 7,9+7−10+8−6 = 6,9
+   *              d 12+10−2+11,5−10 = 21,5 · e 9,5+10−8+5 = 16,5 · f 15,2+5+0+10−4 = 26,2
+   * Grøn:        a 20+20+15+15 = 70 · b 10+25+10 = 45 · c 25+10+25+20 = 80
+   *              d 5+0+5+25 = 35 · e 15+5+20 = 40 · f 0+25+0+15 = 40 (e foran f: 1 etapesejr mod 0)
+   * Bjerg:       a 3+10 = 13 · b 2+20 = 22 · c 5+15 = 20 · d 10+1 = 11 · e 4+25 = 29 · f 5
    */
   const content = contentWith(six);
   const g = game({
     1: stageState(1, { times: { a: 8.4, b: 10.1, c: 7.9, d: 12.0, e: 9.5, f: 15.2 } }),
     2: stageState(2, { order: ['b', 'a', 'f', 'c', 'e', 'd'], carrotGroups: [['c', 'e']], bonuses: { start: 'f', third: 'd' } }),
-    3: stageState(3, {
-      quiz: { '0-0': ['a', 'b', 'c'], '0-4': ['a'], '2-3': ['c', 'd'], '4-2': ['e'] },
-      dice: { a: 0, b: 4.2, c: 12.5, d: 2.0, e: 7.7, f: 20.0 },
-    }),
+    3: stageState(3, { manual: { a: 3, b: 2, c: 5, d: 1, e: 4, f: 0 } }),
     4: stageState(4, { hits: ['b', 'e'], dice: { b: 7, e: 11 }, times: { a: 9.0, b: 14.0, c: 8.0, d: 11.5, e: 16.0, f: 10.0 } }),
     5: stageState(5, {
       hits: ['a', 'c', 'd', 'f'],
@@ -424,43 +433,44 @@ describe('Komplet testløb: 6 ryttere gennem alle 5 etaper (stemmer med håndreg
   });
 
   it('samlet tid (gul)', () => {
-    expect(six.map((id) => s.totals[id].timeSec)).toEqual([10.4, 18.3, 23.4, 22.5, 29.2, 46.2]);
+    expect(six.map((id) => s.totals[id].timeSec)).toEqual([10.4, 13.1, 6.9, 21.5, 16.5, 26.2]);
     expect(s.tables.gul.map((r) => [r.riderId, r.value])).toEqual([
+      ['c', 6.9],
       ['a', 10.4],
-      ['b', 18.3],
-      ['d', 22.5],
-      ['c', 23.4],
-      ['e', 29.2],
-      ['f', 46.2],
+      ['b', 13.1],
+      ['e', 16.5],
+      ['d', 21.5],
+      ['f', 26.2],
     ]);
   });
 
   it('pointkonkurrencen (grøn)', () => {
-    expect(six.map((id) => s.totals[id].gron)).toEqual([83, 51, 63, 52, 32, 40]);
-    expect(s.tables.gron.map((r) => r.riderId)).toEqual(['a', 'c', 'd', 'b', 'f', 'e']);
+    expect(six.map((id) => s.totals[id].gron)).toEqual([70, 45, 80, 35, 40, 40]);
+    expect(s.tables.gron.map((r) => r.riderId)).toEqual(['c', 'a', 'b', 'e', 'f', 'd']);
   });
 
   it('bjergkonkurrencen (prikket)', () => {
-    expect(six.map((id) => s.totals[id].prik)).toEqual([13, 21, 18, 12, 26, 5]);
+    expect(six.map((id) => s.totals[id].prik)).toEqual([13, 22, 20, 11, 29, 5]);
     expect(s.tables.prik.map((r) => r.riderId)).toEqual(['e', 'b', 'c', 'a', 'd', 'f']);
   });
 
   it('etapesejre og ingen uafgjorte', () => {
-    expect(six.map((id) => s.totals[id].stageWins)).toEqual([1, 1, 1, 1, 1, 0]);
+    expect(six.map((id) => s.totals[id].stageWins)).toEqual([0, 1, 2, 1, 1, 0]);
     expect(Object.values(s.tables).flat().some((r) => r.tied)).toBe(false);
   });
 
   it('stillingen efter etape 3', () => {
     const s3 = computeStandings(content, g, 3);
-    // a 8,4+3−6 = 5,4 · d 12+10−1 = 21 · b 10,1+0+1,2 = 11,3
-    expect(s3.tables.gul[0]).toMatchObject({ riderId: 'a', value: 5.4 });
-    expect(s3.totals.b.timeSec).toBe(11.3);
-    expect(s3.totals.d.timeSec).toBe(21);
+    // c 7,9+7−10 = 4,9 · a 8,4+3−6 = 5,4 · b 10,1+0−4 = 6,1 · d 12+10−2 = 20
+    expect(s3.tables.gul[0]).toMatchObject({ riderId: 'c', value: 4.9 });
+    expect(s3.totals.a.timeSec).toBe(5.4);
+    expect(s3.totals.b.timeSec).toBe(6.1);
+    expect(s3.totals.d.timeSec).toBe(20);
   });
 });
 
 describe('Konfigurerbare regler (content.json)', () => {
-  it('ny pointskala, tidstillæg, quizværdier og bonussekunder slår igennem', () => {
+  it('ny pointskala, tidstillæg, udbrudsværdier og bonussekunder slår igennem', () => {
     const c = contentWith(['a', 'b', 'c']);
     const custom = {
       ...c,
@@ -468,7 +478,7 @@ describe('Konfigurerbare regler (content.json)', () => {
       stages: c.stages.map((s) => {
         const sc = s.scoring;
         if (sc.type === 'sprint') return { ...s, scoring: { ...sc, placementTimePenaltySec: [0, 1], bonuses: [{ id: 'start', label: 'x', jersey: 'prik' as const, points: 3 }] } };
-        if (sc.type === 'udbrud') return { ...s, scoring: { ...sc, quizCorrectAnswerSec: -5, quizRowPoint: [9, 9, 9, 9, 9] } };
+        if (sc.type === 'udbrud') return { ...s, scoring: { ...sc, secPerCorrect: -5, bjergpointPerCorrect: 2, maxCountedCorrect: 3 } };
         if (sc.type === 'champs') return { ...s, scoring: { ...sc, knockoutBonusSec: [-20, -1] } };
         return s;
       }),
@@ -477,16 +487,16 @@ describe('Konfigurerbare regler (content.json)', () => {
       custom,
       game({
         2: stageState(2, { order: ['a', 'b', 'c'], bonuses: { start: 'c' } }),
-        3: stageState(3, { quiz: { '0-0': ['b'] }, dice: { a: 1, b: 1, c: 9 } }),
+        3: stageState(3, { manual: { a: 1, b: 4, c: 0 } }),
         5: stageState(5, { hits: ['a', 'b'], rounds: [{ duels: [{ a: 'a', b: 'b', winner: 'b' }] }] }),
       }),
     );
     // Sprint: a 10, b 5, c 1 (+3 bjerg); tid a 0, b 1, c 1 (gentager sidste)
-    // Udbrud: b −5s+1 = −4 (1.) 10+9 point; a 1 (2.) 5; c 9 (3.) 1
+    // Udbrud: b 4 (1., 10 point; 3 tæller → −15s, 6 bjerg); a 1 (2., 5 point; −5s, 2 bjerg); c 0 (3., 1 point)
     // Champs: b −20s, 10 point; a −1s, 5 point
-    expect(s.totals.a).toMatchObject({ gron: 10 + 5 + 5, timeSec: 0 + 1 - 1 });
-    expect(s.totals.b).toMatchObject({ gron: 5 + 19 + 10, timeSec: 1 - 4 - 20 });
-    expect(s.totals.c).toMatchObject({ gron: 1 + 1, prik: 3, timeSec: 1 + 9 });
+    expect(s.totals.a).toMatchObject({ gron: 10 + 5 + 5, timeSec: 0 - 5 - 1, prik: 2 });
+    expect(s.totals.b).toMatchObject({ gron: 5 + 10 + 10, timeSec: 1 - 15 - 20, prik: 6 });
+    expect(s.totals.c).toMatchObject({ gron: 1 + 1, prik: 3, timeSec: 1 + 0 });
   });
 
   it('tiebreak-rækkefølgen kan ændres', () => {

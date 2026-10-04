@@ -68,7 +68,7 @@ Tryk **K**, eller klik **▶ Kør etapen** på en ruteside (knappen vises, når 
 |---|---|---|
 | 1 Prolog | Stopur: start, og klik på rytterens navn, når bajeren er bundet. Alle tider kan også tastes eller rettes. | Stort stopur med tider (Vis på skærm) |
 | 2 Sprint | Klik ryttere i målrækkefølge. Træk eller brug ↑/↓ for at rette. **Samme kort – Carrot in the Box** afgør en gruppe. Bonusknapper. | Carrot-duel med "tredje rytter" |
-| 3 Udbrud | Quizbræt: klik et felt, se svaret (kun i panelet), og markér hvem der svarede rigtigt. Ved terningkastet starter første klik uret, og den rytter får 0 sek. | Quizkort med felt og sangnummer. Svaret vises kun, hvis du vælger det. Quiz-sliden kan også klikkes direkte. |
+| 3 Udbrud | **Udbrudsforsøget (højere/lavere):** vælg rytteren, og tryk **▲ Højere** eller **▼ Lavere** for hans gæt. Appen trækker kortene fra en blandet bunke, tæller udbruddet og stopper ved forkert gæt. Bruger I rigtige kort, tastes antal rigtige i stedet. | Kortene stort, antal i træk, "Hentet af feltet!" og stillingen over længste udbrud |
 | 4 Bjerg | Hvem ramte beerpong, terningsum pr. udbryder og bajer på tid. | Stort stopur |
 | 5 Champs-Élysées | Hvem ramte. Én: **Vinokourov-mirakel** med terningsum. Flere: knock-out med tilfældig parring og walkover, hvor du klikker vinderen af hver duel. | Vinokourov-animation og bracket |
 
@@ -79,7 +79,7 @@ Fanen **Klassement** viser uafgjorte trøjer, som ikke kan afgøres automatisk, 
 Hele kommissærpanelet kan køres fra din telefon, mens præsentationen kører på storskærmen:
 
 - slides frem og tilbage og spring til en slide
-- alle fem etaper, inklusive stopur, quiz (svaret ses kun på telefonen), knock-out og Vinokourov
+- alle fem etaper, inklusive stopur, udbrudsforsøget (højere/lavere), knock-out og Vinokourov
 - klassement-overlay, Fortryd og Nulstil etape
 
 Skærmen og telefonen taler sammen gennem et lille **relæ på Cloudflare**: en Worker med en Durable Object pr. "rum", som kører på gratisplanen. Den samme Worker serverer også appen, så telefonen kun skal bruge én adresse.
@@ -129,7 +129,19 @@ Konfigurationen ligger i `remote/wrangler.toml` (navn, Durable Object og app-fil
 
 ## Regler og scoring
 
-Regelteksten og alle tal ligger i `src/content/content.json` under `rules` og `stages[].scoring`. Det gælder pointskala, tidstillæg, bonusser, quizværdier, bonussekunder og tiebreak. Intet er hardcodet.
+Regelteksten og alle tal ligger i `src/content/content.json` under `rules` og `stages[].scoring`. Det gælder pointskala, tidstillæg, bonusser, værdierne for udbrudsforsøget, bonussekunder og tiebreak. Intet er hardcodet.
+
+### Bjergpoint og tid på tværs af etaperne
+
+| Etape | Bjergpoint | Tid til gul |
+|---|---|---|
+| 1 Prolog | – | bajer-tiden |
+| 2 Sprint | +10 til én rytter (bonus) | +0/3/5/7/10 sek. |
+| 3 Udbrud | 1 pr. rigtigt gæt, højst 10 | −2 sek. pr. rigtigt gæt, højst −20 |
+| 4 Bjerg | 25/20/15/10/5 | bajer-tid minus forspring |
+| 5 Champs | – | −10/−6/−4 sek. |
+
+Bjergetapen afgør den prikkede trøje: de andre etaper kan tilsammen højst give 20 bjergpoint, mindre end en etapesejr på bjerget. Værdierne for etape 3 (`secPerCorrect`, `bjergpointPerCorrect`, `maxCountedCorrect`) står i `content.json`.
 
 Al regnelogik ligger i `src/game/` som rene funktioner uden React og er dækket af Vitest:
 
@@ -140,7 +152,7 @@ Al regnelogik ligger i `src/game/` som rene funktioner uden React og er dækket 
 - `podium.ts`: podiet og trøjeførere.
 - `gameState.ts`: validering af gemt eller importeret spiltilstand og fortryd-historik.
 
-Spiltilstanden indeholder kun rå input (tider, rækkefølger, quizsvar, terningsummer og duel-vindere) plus manuelle rettelser. Alt andet regnes ud hver gang, så en rettet tid slår igennem overalt.
+Spiltilstanden indeholder kun rå input (tider, rækkefølger, kort og gæt, terningsummer og duel-vindere) plus manuelle rettelser. Alt andet regnes ud hver gang, så en rettet tid slår igennem overalt.
 
 **Lighed i etaper:** Placeringer med præcis samme tid (0,1 s) deles (1, 1, 3 …), indtil kommissæren vælger rækkefølgen.
 
@@ -195,7 +207,7 @@ Test i et privat vindue: `https://le-tur-2026.pages.dev` skal nu vise Cloudflare
 
 ```bash
 npm run dev           # udviklingsserver på http://localhost:5173
-npm test              # Vitest: scoring, knock-out, podie, quiz, backup, redigering m.m.
+npm test              # Vitest: scoring, højere/lavere, knock-out, podie, backup, redigering m.m.
 npm run build         # typecheck + single-file-build
 npm run verify:dist   # statisk kontrol: dist/index.html har ingen eksterne ressourcer
 npm run check:slides  # åbner dist/index.html fra disk uden netværk ved 1920×1080 og 1280×720
@@ -233,7 +245,7 @@ src/
   editor/          redigeringspanel (E) og opsætning (backup/nulstil)
   commissioner/    kommissærpanel (K), etapepaneler, bracket, Carrot-hjælper, projektor-overlays
   remote/          fjernbetjening: protokol, forbindelse, skærmens side (RemoteHost), telefonens app, QR
-  game/            scoring, knock-out, podie, quiz, spiltilstand (rene funktioner + Vitest)
+  game/            scoring, højere/lavere, knock-out, podie, spiltilstand (rene funktioner + Vitest)
 public/_headers    headers til Cloudflare Pages
 remote/            Cloudflare Worker + Durable Object (relæ) og wrangler.toml
 scripts/           check-slides, e2e, verify-dist og fælles testdata

@@ -2,6 +2,10 @@
 import type { Content } from '../content/types';
 import { emptyGame, emptyInput, emptyStageState } from './scoring';
 import type { GameState, StageState } from './types';
+import { RANKS, SUITS } from './highlow';
+
+const CARD_RE = new RegExp(`^(${RANKS.join('|')})[${SUITS.join('')}]$`);
+const isCard = (c: string) => CARD_RE.test(c);
 
 const isObj = (v: unknown): v is Record<string, unknown> => !!v && typeof v === 'object' && !Array.isArray(v);
 const strArr = (v: unknown): string[] => (Array.isArray(v) ? v.filter((x): x is string => typeof x === 'string') : []);
@@ -53,10 +57,25 @@ export function sanitizeGame(raw: unknown, content: Pick<Content, 'stages'>): Ga
         };
         break;
       case 'udbrud':
+        // Gamle gemte data fra musikquizzen (quiz/dice) har ingen runs og bliver til en tom etape.
         st.input = {
           type,
-          quiz: isObj(i.quiz) ? Object.fromEntries(Object.entries(i.quiz).map(([k, v]) => [k, strArr(v)])) : {},
-          dice: numRec(i.dice),
+          runs: isObj(i.runs)
+            ? Object.fromEntries(
+                Object.entries(i.runs)
+                  .filter(([, r]) => isObj(r))
+                  .map(([id, r]) => {
+                    const run = r as Record<string, unknown>;
+                    const cards = strArr(run.cards).filter(isCard);
+                    const guesses = (Array.isArray(run.guesses) ? run.guesses : []).filter((g): g is 'op' | 'ned' => g === 'op' || g === 'ned');
+                    return [id, { cards, guesses: guesses.slice(0, Math.max(0, cards.length - 1)), done: run.done === true }];
+                  })
+                  .filter(([, r]) => (r as { cards: string[] }).cards.length > 0),
+              )
+            : {},
+          manual: numRec(i.manual),
+          deck: strArr(i.deck).filter(isCard),
+          active: typeof i.active === 'string' ? i.active : null,
         };
         break;
       case 'bjerg':

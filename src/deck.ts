@@ -9,7 +9,6 @@ import { RiderPresentationSlide } from './slides/RiderPresentationSlide';
 import { CommissionerSlide } from './slides/CommissionerSlide';
 import { StageDividerSlide, StageRouteSlide } from './slides/StageSlides';
 import { CarrotSlide } from './slides/CarrotSlide';
-import { QuizBoardSlide } from './slides/QuizBoardSlide';
 import { StandingsSlide } from './slides/StandingsSlide';
 import { PodiumSlide } from './slides/PodiumSlide';
 
@@ -33,7 +32,6 @@ export const deck: DeckEntry[] = [
 
   { id: 'etape-3', title: 'Etape 3: Udbrud', component: StageDividerSlide, props: { stage: 3 } },
   { id: 'rute-3', title: 'Ruten: Udbrudsetapen', component: StageRouteSlide, props: { stage: 3 } },
-  { id: 'quiz', title: 'Musikquizzen', component: QuizBoardSlide, stage: 3 },
   { id: 'stilling-3', title: 'Stilling efter etape 3', component: StandingsSlide, props: { afterStage: 3 } },
 
   { id: 'etape-4', title: 'Etape 4: Bjerg', component: StageDividerSlide, props: { stage: 4 } },

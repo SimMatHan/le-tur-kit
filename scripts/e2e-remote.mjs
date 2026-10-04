@@ -164,27 +164,28 @@ await step('Stopuret startes på telefonen og vises på skærmen med samme tid',
   await until(async () => !/ETAPE 1 · PROLOG/i.test(await screenText()), 'overlay blev ikke lukket');
 });
 
-await step('Quiz: kortet vises på skærmen, svaret kun på telefonen', async () => {
+await step('Udbrudsforsøget: telefonen trækker kort, skærmen viser dem', async () => {
   await phone.locator('.stage-tab', { hasText: /^3/ }).click();
-  await panel.locator('.mini-col').nth(1).locator('.mini-cell').nth(2).click();
-  await until(async () => (await screenText()).includes('Danish Remix'), 'quizkortet vises ikke på skærmen');
-  expect(!(await screenText()).includes('Emil Stabil'), 'svaret må ikke stå på skærmen');
-  await panel.locator('summary', { hasText: 'Vis svar' }).click();
-  expect((await panel.innerText()).includes('Emil Stabil'), 'svaret vises ikke på telefonen');
-  await panel.locator('.quiz-card-panel').scrollIntoViewIfNeeded();
-  await shot(phone, 'remote-phone-quiz');
-  await shot(screen, 'remote-screen-quiz');
+  await phone.evaluate(() => (Math.random = () => 0.99)); // sorteret bunke: 2♠, 3♠, 4♠ …
   await panel.locator('.toggle', { hasText: 'Erik' }).click();
-  await panel.getByRole('button', { name: 'Luk kort (marker brugt)' }).click();
-  await until(async () => (await screenGame()).stages?.[3]?.input?.quiz?.['1-2']?.includes('r5'), 'quizsvaret nåede ikke skærmen');
-  await until(async () => !(await screenText()).includes('Danish Remix'), 'kortet blev ikke lukket');
+  await until(async () => /Udbrudsforsøget/i.test(await screenText()) && (await screenText()).includes('Erik'), 'udbrudsforsøget vises ikke på skærmen');
+  await panel.getByRole('button', { name: '▲ Højere' }).click();
+  await panel.getByRole('button', { name: '▲ Højere' }).click();
+  await until(async () => (await screen.locator('.playing-card').count()) === 3, 'kortene vises ikke på skærmen');
+  await shot(phone, 'remote-phone-udbrud');
+  await panel.getByRole('button', { name: '▼ Lavere' }).click();
+  await until(async () => (await screenText()).includes('Hentet af feltet!'), 'skærmen viser ikke, at rytteren er hentet');
+  await shot(screen, 'remote-screen-udbrud');
+  await until(async () => (await screenGame()).stages?.[3]?.input?.runs?.r5?.done === true, 'forsøget nåede ikke skærmen');
+  await phone.getByRole('button', { name: 'Luk overlay på skærmen' }).click();
+  await until(async () => !/Udbrudsforsøget/i.test(await screenText()), 'overlay blev ikke lukket');
 });
 
 await step('Nulstil etape fra telefonen', async () => {
   await panel.getByRole('button', { name: 'Nulstil etape 3' }).click();
   await until(async () => {
     const st = (await screenGame()).stages?.[3];
-    return st && st.status === 'idle' && Object.keys(st.input.quiz).length === 0;
+    return st && st.status === 'idle' && Object.keys(st.input.runs).length === 0;
   }, 'etape 3 blev ikke nulstillet på skærmen');
   expect((await screenGame()).stages[1].input.times.r1 === 8.4, 'andre etaper må ikke påvirkes');
 });

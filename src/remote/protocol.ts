@@ -12,7 +12,7 @@ export type Role = 'screen' | 'remote';
 export type ProjectorViewData =
   | null
   | { kind: 'stopwatch'; stage: number }
-  | { kind: 'quiz'; cat: number; row: number; reveal: boolean }
+  | { kind: 'highlow' }
   | { kind: 'bracket' }
   | { kind: 'vinokourov' }
   | { kind: 'carrot'; a: string; b: string; third: string | null };
@@ -173,7 +173,7 @@ export function parseClientMessage(data: unknown): ClientMessage | null {
   }
 }
 
-const PROJECTOR_KINDS = ['stopwatch', 'quiz', 'bracket', 'vinokourov', 'carrot'];
+const PROJECTOR_KINDS = ['stopwatch', 'highlow', 'bracket', 'vinokourov', 'carrot'];
 
 /** Renser en patch fra telefonen (spiltilstanden valideres separat med sanitizeGame). */
 export function sanitizePatch(raw: unknown): Patch {
