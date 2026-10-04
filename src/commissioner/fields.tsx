@@ -55,7 +55,9 @@ export function NumberInput({
   step?: number;
 }) {
   const [text, setText] = useState(value?.toString() ?? '');
-  useEffect(() => setText(value?.toString() ?? ''), [value]);
+  useEffect(() => {
+    setText(value?.toString() ?? '');
+  }, [value]);
   const commit = () => {
     const t = text.trim().replace(',', '.').replace('−', '-');
     if (t === '') return value !== null && value !== undefined && onCommit(null);

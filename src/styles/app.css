@@ -136,16 +136,24 @@
   margin: 0 auto;
 }
 .overview-item {
-  background: none;
+  position: relative;
   border: 3px solid transparent;
-  padding: 0;
-  cursor: pointer;
-  text-align: left;
   color: var(--paper);
 }
 .overview-item:hover,
-.overview-item:focus-visible {
+.overview-item:focus-within {
   border-color: var(--yellow);
+}
+.overview-hit {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  padding: 0;
+}
+.overview-hit:focus-visible {
   outline: none;
 }
 .overview-item.current {

@@ -40,7 +40,8 @@ export function Scene({ children, reserveRight = 0 }: { children: ReactNode; res
 export function Thumb({ width, children }: { width: number; children: ReactNode }) {
   const scale = width / SCENE_W;
   return (
-    <div style={{ width, height: SCENE_H * scale, position: 'relative', overflow: 'hidden' }}>
+    // inert: miniaturens knapper kan hverken klikkes eller fokuseres
+    <div inert style={{ width, height: SCENE_H * scale, position: 'relative', overflow: 'hidden' }}>
       <div style={{ width: SCENE_W, height: SCENE_H, transform: `scale(${scale})`, transformOrigin: '0 0', position: 'absolute', pointerEvents: 'none' }}>
         {children}
       </div>

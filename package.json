@@ -14,12 +14,13 @@
     "check:slides": "node scripts/check-slides.mjs",
     "test:e2e": "node scripts/e2e.mjs",
     "verify:dist": "node scripts/verify-dist.mjs",
-    "verify": "npm test && npm run build && npm run verify:dist && npm run check:slides && npm run test:e2e",
+    "verify": "npm test && npm run build && npm run verify:dist && npm run test:dev && npm run check:slides && npm run test:e2e",
     "deploy:create": "npx --yes wrangler@4 pages project create le-tur-2026 --production-branch main",
     "test:remote": "node scripts/e2e-remote.mjs",
     "dev:remote": "npm run build && npx --yes wrangler@4 dev --config remote/wrangler.toml",
     "deploy:remote": "npm run build && npm run verify:dist && npx --yes wrangler@4 deploy --config remote/wrangler.toml",
-    "typecheck:remote": "tsc -p remote/tsconfig.json"
+    "typecheck:remote": "tsc -p remote/tsconfig.json",
+    "test:dev": "node scripts/dev-smoke.mjs"
   },
   "dependencies": {
     "@fontsource-variable/fraunces": "^5.3.0",
