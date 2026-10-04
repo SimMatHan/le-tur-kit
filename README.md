@@ -2,7 +2,7 @@
 
 Drukspil-etapeløb for vennegruppen som web-app: præsentation på storskærm, kommissærpanel til at køre etaperne og automatisk klassement. Al tekst er på dansk, og alt kører i browseren (ingen backend, ingen login, ingen tracking).
 
-> Status: **fase 3** – præsentation, redigering, backup og scoringsmotor med tests. Klassement og podie regnes ud automatisk.
+> Status: **fase 4** – præsentation, redigering, backup, scoringsmotor og kommissærpaneler til alle fem etaper.
 
 ## Kom i gang
 
@@ -26,6 +26,8 @@ npm run test:e2e     # end-to-end: redigér, upload foto, genindlæs, eksport �
 | O | Oversigt med miniaturer (klik for at hoppe) |
 | S | Klassement som overlay |
 | E | Redigér rytteren/kommissæren på den aktuelle slide |
+| K | Kommissærpanel (åbner på etapen for den aktuelle slide) |
+| Ctrl+Z | Fortryd seneste handling i kommissærpanelet |
 | ? | Genveje |
 | Esc | Luk overlays |
 
@@ -69,6 +71,20 @@ reference/         design-reference.pdf, de oprindelige filer og det oprindelige
 
 1. Lav en komponent i `src/slides/`, der tager `{ page }` (og evt. egne props).
 2. Tilføj én linje i `src/deck.ts`, fx `{ id: 'min-slide', title: 'Min slide', component: MinSlide }`.
+
+## Kør etaperne (kommissærpanelet)
+
+Tryk **K** (eller **▶ Kør etapen** på en ruteside, når musen bevæges). Panelet lægger sig til højre, mens sliden stadig ses. Øverst vælges etape, og der er **Fortryd** (Ctrl+Z), **Afslut etapen** og **Genåbn etapen**. Nederst ses etaperesultatet live med **✎** til manuelle rettelser (tid ±, point ±, bjergpoint ± og en note) og afgørelse af uafgjorte placeringer.
+
+| Etape | I panelet | På skærmen |
+|---|---|---|
+| 1 Prolog | Stopur: start og klik på rytterens navn, når bajeren er bundet. Alle tider kan også tastes/rettes. | Stort stopur med tider (Vis på skærm) |
+| 2 Sprint | Klik ryttere i målrækkefølge, træk eller ↑/↓ for at rette. **Samme kort – Carrot in the Box** afgør en gruppe. Bonusknapper. | Carrot-duel med "tredje rytter" |
+| 3 Udbrud | Quizbræt: klik et felt, se svaret (kun i panelet), markér hvem der svarede rigtigt. Terningkast-stopur, hvor første klik starter uret (0 sek.). | Quizkort med felt og sangnummer – svaret kun hvis du vælger det. Quiz-sliden kan også klikkes direkte. |
+| 4 Bjerg | Hvem ramte beerpong, terningsum pr. udbryder, bajer på tid. | Stort stopur |
+| 5 Champs-Élysées | Hvem ramte. Én: **Vinokourov-mirakel** med terningsum. Flere: knock-out med tilfældig parring, walkover og klik på vinderen af hver duel. | Vinokourov-animation, bracket |
+
+Fanen **Klassement** viser uafgjorte trøjer, som ikke kan afgøres automatisk, og lader kommissæren vælge rækkefølgen.
 
 ## Scoring
 

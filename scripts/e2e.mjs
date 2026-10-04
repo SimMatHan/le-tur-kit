@@ -164,6 +164,144 @@ await step('Import genskaber indhold og foto', async () => {
   expect((await sceneText()).includes('Den allervidende'), 'kommissær ikke genskabt');
 });
 
+await step('Kommissæren kører alle 5 etaper via panelerne (samme resultat som håndregningen)', async () => {
+  const names = ['Anna', 'Bent', 'Carl', 'Dorte', 'Erik', 'Frida'];
+  const riders = names.map((name, i) => ({ id: `r${i + 1}`, number: i + 1, name, nickname: '', bio: '', traits: [], photo: null }));
+  await page.evaluate((c) => {
+    localStorage.setItem('le-tur-2026:content', JSON.stringify(c));
+    localStorage.removeItem('le-tur-2026:game');
+    location.hash = '#/1';
+  }, { riders });
+  await page.reload();
+  await waitReload();
+  const panel = page.locator('.commissioner');
+  const section = (title) => panel.locator('.panel-section').filter({ has: page.locator('h3', { hasText: title }) });
+  const fill = async (label, value) => {
+    const f = panel.getByLabel(label, { exact: true });
+    await f.fill(value);
+    await f.press('Enter');
+  };
+  const tab = (n) => panel.locator('.stage-tab', { hasText: new RegExp(`^${n}`) }).click();
+  const finish = () => panel.getByRole('button', { name: 'Afslut etapen' }).click();
+
+  // "Kør etapen" på rutesiden åbner panelet på den rigtige etape
+  const total = await slideCount();
+  for (let i = 1; i <= total; i++) {
+    await page.evaluate((n) => (location.hash = `#/${n}`), i);
+    await page.waitForTimeout(40);
+    if ((await sceneText()).includes('Ruten: Prolog')) break;
+  }
+  await page.mouse.move(300, 300);
+  await page.locator('.run-stage').click();
+  await panel.waitFor();
+  expect((await panel.locator('.stage-head').innerText()).includes('Etape 1'), 'Kør etapen åbnede ikke etape 1');
+
+  // Etape 1: stopur (røgtest) og derefter præcise tider manuelt
+  await section('Stopur').getByRole('button', { name: 'Start' }).click();
+  await page.waitForTimeout(350);
+  await section('Stopur').locator('.split-btn', { hasText: 'Anna' }).click();
+  const t = await section('Stopur').locator('.split.done .split-time').first().innerText();
+  expect(/^0,[2-9]|^1,/.test(t), `stopuret registrerede ikke en tid (${t})`);
+  await section('Stopur').getByRole('button', { name: 'Stop' }).click();
+  await section('Stopur').getByRole('button', { name: 'Nulstil ur' }).click();
+  for (const [n, v] of [['Anna', '8,4'], ['Bent', '10,1'], ['Carl', '7,9'], ['Dorte', '12'], ['Erik', '9,5'], ['Frida', '15,2']]) await fill(`Tid for ${n}`, v);
+  await finish();
+
+  // Etape 2: rækkefølge, fortryd, samme kort (Carrot) og bonusser
+  await tab(2);
+  const order = section('Rækkefølge');
+  for (const n of ['Bent', 'Anna', 'Frida']) await order.getByRole('button', { name: `+ ${n}` }).click();
+  await order.getByRole('button', { name: '+ Dorte' }).click(); // fejlklik
+  await page.keyboard.press('Control+z');
+  expect(!(await order.locator('.order-list').innerText()).includes('Dorte'), 'Ctrl+Z fortrød ikke');
+  await order.getByRole('button', { name: 'Samme kort – Carrot in the Box' }).click();
+  await order.getByRole('button', { name: 'Carl' }).click();
+  await order.getByRole('button', { name: 'Erik' }).click();
+  await order.getByRole('button', { name: 'Kør Carrot in the Box' }).click();
+  await order.getByRole('button', { name: '🥕 Vælg tredje rytter' }).click();
+  const duelText = await page.locator('.scene').innerText();
+  expect(/Carl\s+mod\s+Erik/i.test(duelText) && /udpeger/.test(duelText), 'Carrot-duellen vises ikke på skærmen: ' + duelText.slice(0, 200));
+  await order.locator('.order-picker').getByRole('button', { name: 'Carl' }).click();
+  await order.getByRole('button', { name: '+ Dorte' }).click();
+  const bonus = section('Bonusser');
+  await bonus.locator('.bonus-row').nth(0).getByRole('button', { name: 'Frida' }).click();
+  await bonus.locator('.bonus-row').nth(1).getByRole('button', { name: 'Dorte' }).click();
+  await finish();
+
+  // Etape 3: quiz og terningtider
+  await tab(3);
+  const quiz = section('Musikquiz');
+  const cell = (c, r) => quiz.locator('.mini-col').nth(c).locator('.mini-cell').nth(r);
+  const answer = async (c, r, who) => {
+    await cell(c, r).click();
+    for (const n of who) await quiz.locator('.toggle', { hasText: n }).click();
+    await quiz.getByRole('button', { name: 'Luk kort (marker brugt)' }).click();
+  };
+  await cell(0, 0).click();
+  const card = await page.locator('.scene').innerText();
+  expect(/sang nr. i playlisten/i.test(card) && /Sportsevent/.test(card), 'quizkortet vises ikke på skærmen');
+  expect(!card.includes('Volbeat'), 'svaret må ikke vises på skærmen som standard');
+  await quiz.getByRole('button', { name: 'Vis svar på skærmen' }).click();
+  expect((await page.locator('.scene').innerText()).includes('Volbeat'), 'svaret kan ikke vises på skærmen');
+  await quiz.getByRole('button', { name: 'Luk kort (marker brugt)' }).click();
+  await quiz.getByRole('button', { name: 'Nulstil felt' }).count(); // felt 0-0 er nu brugt uden svar
+  await answer(0, 0, ['Anna', 'Bent', 'Carl']);
+  await answer(0, 4, ['Anna']);
+  await answer(2, 3, ['Carl', 'Dorte']);
+  await answer(4, 2, ['Erik']);
+  expect((await quiz.locator('.mini-cell.used').count()) === 4, 'brugte felter markeres ikke');
+  for (const [n, v] of [['Anna', '0'], ['Bent', '4,2'], ['Carl', '12,5'], ['Dorte', '2'], ['Erik', '7,7'], ['Frida', '20']]) await fill(`Terningtid for ${n}`, v);
+  await finish();
+
+  // Etape 4: beerpong, terningsum og bajer-tider
+  await tab(4);
+  for (const n of ['Bent', 'Erik']) await section('Beerpong').locator('.toggle', { hasText: n }).click();
+  await fill('Terningsum for Bent', '7');
+  await fill('Terningsum for Erik', '11');
+  for (const [n, v] of [['Anna', '9'], ['Bent', '14'], ['Carl', '8'], ['Dorte', '11,5'], ['Erik', '16'], ['Frida', '10']]) await fill(`Bajer-tid for ${n}`, v);
+  await finish();
+
+  // Etape 5: først Vinokourov (kun Anna ramte), derefter knock-out med fire
+  await tab(5);
+  const shots = section('Beerpong');
+  await shots.locator('.toggle', { hasText: 'Anna' }).click();
+  await panel.getByRole('button', { name: 'Vis miraklet på skærmen' }).click();
+  expect((await page.locator('.scene').innerText()).toLowerCase().includes('vinokourov-mirakel'), 'Vinokourov vises ikke');
+  await page.keyboard.press('Escape');
+  for (const n of ['Carl', 'Dorte', 'Frida']) await shots.locator('.toggle', { hasText: n }).click();
+  await page.evaluate(() => (Math.random = () => 0.99)); // deterministisk parring: (Anna–Carl), (Dorte–Frida)
+  await panel.getByRole('button', { name: /Start knock-out/ }).click();
+  const br = panel.locator('.bracket');
+  await br.locator('.duel').nth(0).getByRole('button', { name: 'Carl' }).click();
+  await br.locator('.duel').nth(1).getByRole('button', { name: 'Dorte' }).click();
+  await panel.getByRole('button', { name: 'Næste runde (tilfældig parring)' }).click();
+  await br.locator('.bracket-round').nth(1).getByRole('button', { name: 'Dorte' }).click();
+  expect((await panel.innerText()).includes('Dorte vinder Champs-Élysées'), 'ingen vinder');
+  await finish();
+
+  // Genåbn og afslut igen
+  await tab(1);
+  await panel.getByRole('button', { name: 'Genåbn etapen' }).click();
+  expect(/i gang/i.test(await panel.locator('.stage-head').innerText()), 'genåbning virker ikke');
+  await finish();
+  await page.keyboard.press('k');
+
+  // Klassementet skal stemme med håndregningen
+  await page.keyboard.press('s');
+  await page.waitForTimeout(300);
+  const ov = await page.locator('.scene').innerText();
+  for (const s of ['Efter 5 af 5 etaper', '10,4', '+7,9', '+35,8', '83 p', '63 p', '26 p', '21 p']) expect(ov.includes(s), `klassement mangler "${s}"`);
+  await page.keyboard.press('Escape');
+
+  // Spiltilstanden overlever genindlæsning
+  await page.reload();
+  await waitReload();
+  await page.keyboard.press('s');
+  await page.waitForTimeout(300);
+  expect((await page.locator('.scene').innerText()).includes('83 p'), 'resultater ikke bevaret efter genindlæsning');
+  await page.keyboard.press('Escape');
+});
+
 await step('Klassement, stilling og podie viser resultater fra spiltilstanden (fuldt løb med 6 ryttere)', async () => {
   // Samme løb som håndregningen i src/game/scoring.test.ts (a–f = r1–r6).
   const names = ['Anna', 'Bent', 'Carl', 'Dorte', 'Erik', 'Frida'];

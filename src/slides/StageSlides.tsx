@@ -2,6 +2,7 @@ import { useContent, useStage } from '../content/ContentContext';
 import { StageDivider } from '../components/StageDivider';
 import { StageRoute } from '../components/StageRoute';
 import type { SlideProps } from './types';
+import { useCommissioner } from '../commissioner/CommissionerContext';
 
 export function StageDividerSlide({ stage }: SlideProps & { stage: number }) {
   const s = useStage(stage);
@@ -12,5 +13,17 @@ export function StageDividerSlide({ stage }: SlideProps & { stage: number }) {
 export function StageRouteSlide({ page, stage }: SlideProps & { stage: number }) {
   const s = useStage(stage);
   const content = useContent();
-  return <StageRoute stage={s} content={content} page={page} />;
+  const { openPanel } = useCommissioner();
+  return (
+    <StageRoute
+      stage={s}
+      content={content}
+      page={page}
+      action={
+        <button type="button" className="run-stage chrome-only" onClick={() => openPanel(stage)}>
+          ▶ Kør etapen
+        </button>
+      }
+    />
+  );
 }

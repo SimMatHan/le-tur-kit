@@ -7,16 +7,20 @@ import { useDeckNav } from './useDeckNav';
 import { StandingsOverlay } from './StandingsOverlay';
 import { EditorPanel } from '../editor/EditorPanel';
 import { SetupPanel } from '../editor/SetupPanel';
+import { useCommissioner } from '../commissioner/CommissionerContext';
+import { CommissionerPanel } from '../commissioner/CommissionerPanel';
+import { ProjectorOverlay } from '../commissioner/ProjectorOverlay';
+import { useGame } from '../game/GameContext';
 
 type Overlay = null | 'overview' | 'standings' | 'help' | 'setup';
 
-function useEditorWidth() {
-  const [w, setW] = useState(() => Math.round(Math.min(440, window.innerWidth * 0.42)));
+function useSideWidth(max: number) {
+  const [w, setW] = useState(() => Math.round(Math.min(max, window.innerWidth * 0.45)));
   useEffect(() => {
-    const on = () => setW(Math.round(Math.min(440, window.innerWidth * 0.42)));
+    const on = () => setW(Math.round(Math.min(max, window.innerWidth * 0.45)));
     window.addEventListener('resize', on);
     return () => window.removeEventListener('resize', on);
-  }, []);
+  }, [max]);
   return w;
 }
 
@@ -38,14 +42,18 @@ export function Presenter() {
   const [chrome, setChrome] = useState(false);
   const [editing, setEditing] = useState(false);
   const [pendingEdit, setPendingEdit] = useState<string | null>(null);
-  const editorW = useEditorWidth();
+  const editorW = useSideWidth(440);
+  const commW = useSideWidth(580);
+  const comm = useCommissioner();
+  const { undo } = useGame();
   const hideTimer = useRef<number | undefined>(undefined);
 
   const slide = slides[index];
 
   const toggle = useCallback((o: Exclude<Overlay, null>) => setOverlay((cur) => (cur === o ? null : o)), []);
   const editTarget = slide?.editTarget;
-  const editorOpen = editing && !!editTarget;
+  const editorOpen = editing && !!editTarget && !comm.open;
+  const sideW = comm.open ? commW : editorOpen ? editorW : 0;
 
   useEffect(() => {
     if (editing && !editTarget && !pendingEdit) setEditing(false);
@@ -57,15 +65,22 @@ export function Presenter() {
     const i = slides.findIndex((s) => s.editTarget === pendingEdit);
     if (i >= 0) {
       go(i);
+      comm.closePanel();
       setEditing(true);
       setOverlay(null);
       setPendingEdit(null);
     }
-  }, [pendingEdit, slides, go]);
+  }, [pendingEdit, slides, go, comm]);
 
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
-      if (isTyping(e) || e.metaKey || e.ctrlKey || e.altKey) return;
+      if (isTyping(e)) return;
+      if ((e.metaKey || e.ctrlKey) && !e.shiftKey && e.key.toLowerCase() === 'z' && comm.open) {
+        e.preventDefault();
+        undo();
+        return;
+      }
+      if (e.metaKey || e.ctrlKey || e.altKey) return;
       switch (e.key) {
         case 'ArrowRight':
         case 'PageDown':
@@ -103,17 +118,30 @@ export function Presenter() {
           break;
         case 'e':
         case 'E':
-          if (editTarget) setEditing((v) => !v);
+          if (editTarget) {
+            comm.closePanel();
+            setEditing((v) => !v);
+          }
+          break;
+        case 'k':
+        case 'K':
+          if (comm.open) comm.closePanel();
+          else {
+            setEditing(false);
+            comm.openPanel(slide?.stage);
+          }
           break;
         case 'Escape':
-          if (overlay) setOverlay(null);
-          else setEditing(false);
+          if (comm.projector) comm.setProjector(null);
+          else if (overlay) setOverlay(null);
+          else if (editing) setEditing(false);
+          else comm.closePanel();
           break;
       }
     };
     window.addEventListener('keydown', onKey);
     return () => window.removeEventListener('keydown', onKey);
-  }, [next, prev, go, toggle, overlay, slides.length, editTarget]);
+  }, [next, prev, go, toggle, overlay, slides.length, editTarget, editing, comm, undo, slide?.stage]);
 
   // Knapper vises kun, når musen bevæges – projektoren forbliver ren.
   useEffect(() => {
@@ -134,16 +162,17 @@ export function Presenter() {
 
   return (
     <div
-      className={`presenter ${chrome || editorOpen ? 'show-chrome' : 'hide-cursor'} ${editorOpen ? 'editing' : ''}`}
-      style={{ ['--editor-w' as string]: `${editorW}px` }}
+      className={`presenter ${chrome || sideW ? 'show-chrome' : 'hide-cursor'} ${sideW ? 'editing' : ''}`}
+      style={{ ['--editor-w' as string]: `${sideW || editorW}px` }}
     >
-      <Scene reserveRight={editorOpen ? editorW : 0}>
+      <Scene reserveRight={sideW}>
         <div key={slide.key} className={`slide-anim ${direction > 0 ? 'from-right' : 'from-left'}`}>
           <Component page={index + 1} {...slide.props} />
         </div>
         <div className="progress" aria-hidden>
           <div className="progress-fill" style={{ width: `${((index + 1) / slides.length) * 100}%` }} />
         </div>
+        <ProjectorOverlay />
         {overlay === 'standings' && <StandingsOverlay onClose={() => setOverlay(null)} />}
       </Scene>
 
@@ -168,6 +197,18 @@ export function Presenter() {
             Redigér
           </CtrlButton>
         )}
+        <CtrlButton
+          label="Kommissærpanel (K)"
+          onClick={() => {
+            if (comm.open) comm.closePanel();
+            else {
+              setEditing(false);
+              comm.openPanel(slide.stage);
+            }
+          }}
+        >
+          Kommissær
+        </CtrlButton>
         <CtrlButton label="Opsætning og backup" onClick={() => toggle('setup')}>
           Opsætning
         </CtrlButton>
@@ -216,6 +257,8 @@ export function Presenter() {
         />
       )}
 
+      {comm.open && <CommissionerPanel />}
+
       {overlay === 'setup' && <SetupPanel onClose={() => setOverlay(null)} onEditRider={(id) => setPendingEdit(id)} />}
     </div>
   );
@@ -234,8 +277,9 @@ const keys: [string, string][] = [
   ['F', 'Fuldskærm'],
   ['O', 'Oversigt med miniaturer'],
   ['S', 'Klassement'],
-  ['K', 'Kommissærpanel'],
+  ['K', 'Kommissærpanel (åbner på den aktuelle etape)'],
   ['E', 'Redigér rytter/kommissær (på deres slides)'],
+  ['Ctrl+Z', 'Fortryd seneste handling i kommissærpanelet'],
   ['Esc', 'Luk overlays'],
 ];
 
