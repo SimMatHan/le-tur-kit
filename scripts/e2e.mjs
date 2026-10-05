@@ -37,7 +37,11 @@ async function step(name, fn) {
 function expect(cond, msg) {
   if (!cond) throw new Error(msg);
 }
-const sceneText = () => page.locator('.slide-anim').innerText();
+// Overskrifter står med versaler via CSS (og innerText følger text-transform),
+// så tekst på scenen sammenlignes uden forskel på store og små bogstaver.
+const ci = (t) => ({ text: t, includes: (s) => t.toLowerCase().includes(s.toLowerCase()) });
+const sceneText = async () => ci(await page.locator('.slide-anim').innerText());
+const screenText = async () => ci(await page.locator('.scene').innerText());
 const slideCount = async () => Number((await page.locator('.controls-count').textContent()).split('/')[1]);
 async function waitReload() {
   await page.waitForLoadState('load');
@@ -120,7 +124,7 @@ await step('Tilføj og fjern rytter (antal slides følger med)', async () => {
   expect((await slideCount()) === before + 1, 'slide ikke tilføjet');
   // Rytter 1 har nu nr. 11, så den nye rytter får første ledige nummer: 1.
   expect((await page.locator('.editor h2').textContent()).includes('nr. 1'), 'ny rytter ikke valgt');
-  expect((await page.locator('.slide-anim').innerText()).includes('Fornavn Efternavn'), 'viser ikke ny rytter');
+  expect((await sceneText()).includes('Fornavn Efternavn'), 'viser ikke ny rytter');
   await page.locator('.editor').getByRole('button', { name: 'Fjern rytter' }).click();
   await page.waitForTimeout(300);
   expect((await slideCount()) === before, 'slide ikke fjernet');
@@ -188,7 +192,7 @@ await step('Kommissæren kører alle 5 etaper via panelerne (samme resultat som 
   for (let i = 1; i <= total; i++) {
     await page.evaluate((n) => (location.hash = `#/${n}`), i);
     await page.waitForTimeout(40);
-    if ((await sceneText()).includes('Ruten: Prolog')) break;
+    if ((await sceneText()).includes('Etape 1 · Ruten')) break;
   }
   await page.mouse.move(300, 300);
   await page.locator('.run-stage').click();
@@ -218,7 +222,7 @@ await step('Kommissæren kører alle 5 etaper via panelerne (samme resultat som 
   await order.getByRole('button', { name: 'Erik' }).click();
   await order.getByRole('button', { name: 'Kør Carrot in the Box' }).click();
   await order.getByRole('button', { name: '🥕 Vælg tredje rytter' }).click();
-  const duelText = await page.locator('.scene').innerText();
+  const duelText = (await screenText()).text;
   expect(/Carl\s+mod\s+Erik/i.test(duelText) && /udpeger/.test(duelText), 'Carrot-duellen vises ikke på skærmen: ' + duelText.slice(0, 200));
   await order.locator('.order-picker').getByRole('button', { name: 'Carl' }).click();
   await order.getByRole('button', { name: '+ Dorte' }).click();
@@ -235,8 +239,8 @@ await step('Kommissæren kører alle 5 etaper via panelerne (samme resultat som 
   for (let i = 0; i < 3; i++) await hl.getByRole('button', { name: '▲ Højere' }).click(); // 3♠, 4♠, 5♠
   await hl.getByRole('button', { name: '▼ Lavere' }).click(); // 6♠ – forkert
   expect((await hl.innerText()).includes('Hentet af feltet efter 3 rigtige'), 'forsøget i appen blev ikke talt rigtigt');
-  const scr = await page.locator('.scene').innerText();
-  expect(/Udbrudsforsøget/i.test(scr) && scr.includes('Hentet af feltet!'), 'udbrudsforsøget vises ikke på skærmen');
+  const scr = await screenText();
+  expect(scr.includes('Udbrudsforsøget') && scr.includes('Hentet af feltet!'), 'udbrudsforsøget vises ikke på skærmen');
   await page.keyboard.press('Escape');
   for (const [n, v] of [['Bent', '2'], ['Carl', '5'], ['Dorte', '1'], ['Erik', '4'], ['Frida', '0']]) await fill(`Udbrud for ${n}`, v);
   await finish();
@@ -254,7 +258,7 @@ await step('Kommissæren kører alle 5 etaper via panelerne (samme resultat som 
   const shots = section('Beerpong');
   await shots.locator('.toggle', { hasText: 'Anna' }).click();
   await panel.getByRole('button', { name: 'Vis miraklet på skærmen' }).click();
-  expect((await page.locator('.scene').innerText()).toLowerCase().includes('vinokourov-mirakel'), 'Vinokourov vises ikke');
+  expect((await screenText()).includes('vinokourov-mirakel'), 'Vinokourov vises ikke');
   await page.keyboard.press('Escape');
   for (const n of ['Carl', 'Dorte', 'Frida']) await shots.locator('.toggle', { hasText: n }).click();
   await page.evaluate(() => (Math.random = () => 0.99)); // deterministisk parring: (Anna–Carl), (Dorte–Frida)
@@ -277,7 +281,7 @@ await step('Kommissæren kører alle 5 etaper via panelerne (samme resultat som 
   // Klassementet skal stemme med håndregningen
   await page.keyboard.press('s');
   await page.waitForTimeout(300);
-  const ov = await page.locator('.scene').innerText();
+  const ov = await screenText();
   for (const s of ['Efter 5 af 5 etaper', '6,9', '+3,5', '+19,3', '80 p', '70 p', '29 p', '22 p']) expect(ov.includes(s), `klassement mangler "${s}"`);
   await page.keyboard.press('Escape');
 
@@ -286,7 +290,7 @@ await step('Kommissæren kører alle 5 etaper via panelerne (samme resultat som 
   await waitReload();
   await page.keyboard.press('s');
   await page.waitForTimeout(300);
-  expect((await page.locator('.scene').innerText()).includes('80 p'), 'resultater ikke bevaret efter genindlæsning');
+  expect((await screenText()).includes('80 p'), 'resultater ikke bevaret efter genindlæsning');
   await page.keyboard.press('Escape');
 });
 
@@ -306,8 +310,8 @@ await step('Klassement, stilling og podie viser resultater fra spiltilstanden (f
   await page.keyboard.press('s');
   await page.waitForTimeout(300);
   if (process.env.E2E_SHOTS) await page.screenshot({ path: `${process.env.E2E_SHOTS}/klassement.png` });
-  const overlay = await page.locator('.scene').innerText();
-  expect(/Efter 5 af 5 etaper/.test(overlay), 'overlay viser ikke 5 etaper');
+  const overlay = await screenText();
+  expect(overlay.includes('Efter 5 af 5 etaper'), 'overlay viser ikke 5 etaper');
   expect(overlay.includes('6,9'), 'førerens tid 6,9 mangler');
   expect(overlay.includes('80 p') && overlay.includes('29 p'), 'point mangler');
   await page.keyboard.press('Escape');

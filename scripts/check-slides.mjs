@@ -89,9 +89,14 @@ for (const run of runs) {
   await page.evaluate(() => document.fonts.ready);
   const count = await page.evaluate(() => Number(document.querySelector('.controls-count')?.textContent?.split('/')[1]));
 
-  const fontOk = await page.evaluate(() => document.fonts.check('italic 800 40px "Fraunces Variable"'));
+  // Fontene indlæses først, når de bruges – så bed om dem, og tjek, at de kan indlæses offline.
+  const fontOk = await page.evaluate(async () => {
+    const specs = ['800 40px "Barlow Condensed"', '700 40px "Barlow Condensed"', '400 20px "Barlow"', '700 20px "Barlow"'];
+    const loaded = await Promise.all(specs.map((s) => document.fonts.load(s).then((f) => f.length > 0, () => false)));
+    return loaded.every(Boolean) && specs.every((s) => document.fonts.check(s));
+  });
   if (!fontOk) {
-    console.log(`${tag} Fraunces er ikke indlæst!`);
+    console.log(`${tag} Barlow-fontene er ikke indlæst!`);
     problems++;
   }
 

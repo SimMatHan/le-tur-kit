@@ -10,13 +10,13 @@ export function RiderPresentationSlide({ page, riderId }: SlideProps & { riderId
   const rider = riders.find((r) => r.id === riderId);
   const standings = useStandings();
   const leads = (['gul', 'gron', 'prik'] as JerseyId[]).filter((j) => jerseyLeader(standings, j) === riderId);
-  if (!rider) return <div className="slide bg-paper" />;
+  if (!rider) return <div className="slide bg-light" />;
   return (
     <RiderSlide
       person={rider}
       kicker={`Rytter nr. ${rider.number}`}
-      medallionLabel="NR."
-      medallionValue={rider.number}
+      bibLabel="NR."
+      bibValue={rider.number}
       page={page}
       leads={leads}
     />

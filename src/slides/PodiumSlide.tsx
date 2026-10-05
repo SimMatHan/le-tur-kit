@@ -33,17 +33,17 @@ export function PodiumSlide(_: SlideProps) {
       : `Foreløbig stilling efter ${data.stagesCounted} af ${stages.length} etaper`;
 
   return (
-    <div className="slide bg-navy">
+    <div className="slide bg-ink">
       {data.final && <Confetti />}
-      <div className="slide-head" style={{ top: 66 }}>
-        <h1 className="h-title c-yellow">{podium.title}</h1>
-        <p className="kicker c-paper" style={{ marginTop: 30, fontSize: 24 }}>
+      <div className="slide-head" style={{ top: 72 }}>
+        <h1 className="h-title">{podium.title}</h1>
+        <p className="kicker" style={{ marginTop: 22, fontSize: 22, color: 'var(--muted-dark)' }}>
           {kicker}
           {data.unresolved && <span className="c-yellow"> · uafgjort afgøres af kommissæren</span>}
         </p>
       </div>
-      <div style={{ position: 'absolute', right: 86, top: 66 }}>
-        <FlagIcon size={110} />
+      <div style={{ position: 'absolute', right: 96, top: 80 }}>
+        <FlagIcon size={100} color="var(--white)" bg="var(--ink)" />
       </div>
       <Podium
         top={data.top.map((s) => (s ? person(s.riderId, s.rank, s.tied) : null))}

@@ -3,9 +3,9 @@
 export type JerseyId = 'gul' | 'gron' | 'prik';
 
 export interface Theme {
-  navy: string;
-  navy2: string;
-  paper: string;
+  ink: string;
+  white: string;
+  bg: string;
   yellow: string;
   red: string;
   green: string;

@@ -1,4 +1,4 @@
-/* Kommissærpanel og projektor-overlays. Funktionelt, men i plakatens palet. */
+/* Kommissærpanel, projektor-overlays og telefonens fjernbetjening. */
 
 .chrome-only {
   opacity: 0;
@@ -12,20 +12,25 @@
 
 .run-stage {
   position: absolute;
-  right: 86px;
-  bottom: 70px;
+  right: 96px;
+  bottom: 96px;
   font: inherit;
-  font-weight: 700;
-  font-size: 30px;
-  background: var(--red);
-  color: var(--paper);
-  border: 5px solid var(--navy);
-  box-shadow: 8px 8px 0 var(--navy);
-  padding: 16px 34px;
+  font-family: var(--display);
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.02em;
+  font-size: 34px;
+  background: var(--yellow);
+  color: var(--ink);
+  border: none;
+  border-radius: 16px;
+  box-shadow: 0 12px 30px rgba(17, 18, 21, 0.2);
+  padding: 18px 34px;
   cursor: pointer;
 }
 .run-stage:hover {
-  background: var(--navy);
+  background: var(--ink);
+  color: var(--yellow);
 }
 
 /* ---------- Panel ---------- */
@@ -35,84 +40,103 @@
 .stage-tabs {
   display: flex;
   gap: 4px;
-  padding: 0 20px 10px;
-  border-bottom: 3px solid var(--navy);
+  margin: 0 20px 6px;
+  padding: 4px;
+  background: var(--bg);
+  border-radius: 12px;
   flex-wrap: wrap;
 }
 .stage-tab {
   font: inherit;
   font-weight: 700;
-  border: 3px solid var(--navy);
-  background: #fff;
-  color: var(--navy);
-  padding: 5px 12px;
+  border: none;
+  border-radius: 9px;
+  background: transparent;
+  color: var(--muted);
+  padding: 7px 12px;
   cursor: pointer;
+  transition: background 120ms;
+}
+.stage-tab:hover {
+  background: var(--mist);
+  color: var(--ink);
 }
 .stage-tab.st-running {
-  background: #fff3c4;
+  color: var(--ink);
+  box-shadow: inset 0 -3px 0 var(--yellow);
 }
 .stage-tab.st-finished {
-  background: #d9f0e0;
+  color: var(--green);
 }
 .stage-tab.active {
-  background: var(--navy);
-  color: var(--yellow);
+  background: var(--ink);
+  color: var(--white);
+}
+.stage-tab.active.st-finished {
+  color: #7fe0a8;
 }
 .stage-head {
   display: flex;
   justify-content: space-between;
   align-items: center;
   gap: 10px;
-  margin: 12px 0 4px;
+  margin: 14px 0 4px;
   font-size: 16px;
 }
 .status {
   display: inline-block;
   margin-left: 10px;
-  font-size: 11px;
+  font-size: 10px;
   font-weight: 700;
   letter-spacing: 0.12em;
   text-transform: uppercase;
-  padding: 2px 8px;
-  background: #e2d7bc;
+  padding: 3px 8px;
+  border-radius: 999px;
+  background: var(--mist);
+  color: var(--muted);
+  vertical-align: 2px;
 }
 .status.st-running {
   background: var(--yellow);
+  color: var(--ink);
 }
 .status.st-finished {
-  background: var(--green);
-  color: #fff;
+  background: var(--green-soft);
+  color: #007a38;
 }
 
 .panel-section {
-  border-top: 2px solid rgba(29, 35, 64, 0.15);
-  padding: 10px 0 14px;
+  border-top: 1px solid var(--mist);
+  padding: 12px 0 16px;
 }
 .panel-section h3 {
   font-weight: 700;
-  font-size: 12px;
-  letter-spacing: 0.18em;
+  font-size: 11px;
+  letter-spacing: 0.16em;
   text-transform: uppercase;
-  color: var(--red);
-  margin: 4px 0 8px;
+  color: var(--muted);
+  margin: 4px 0 10px;
 }
 .panel-section h4 {
   margin: 0 0 6px;
 }
 .btn-go {
   background: var(--green);
-  color: #fff;
+  color: var(--white);
+}
+.btn-go:hover:not(:disabled) {
+  background: #008a40;
 }
 .btn-red {
   background: var(--red);
-  color: var(--paper);
+  color: var(--white);
 }
 .grow {
   flex: 1;
   min-width: 0;
 }
 .muted {
-  color: #5b6180;
+  color: var(--muted);
 }
 .tabular {
   font-variant-numeric: tabular-nums;
@@ -120,28 +144,37 @@
   white-space: nowrap;
 }
 .icon-sm {
-  border: 2px solid var(--navy);
-  background: #fff;
-  color: var(--navy);
+  border: 1px solid var(--line);
+  border-radius: 7px;
+  background: var(--white);
+  color: var(--ink);
   width: 28px;
   height: 28px;
   font-size: 14px;
   cursor: pointer;
   padding: 0;
 }
+.icon-sm:hover:not(:disabled) {
+  background: var(--bg);
+}
 .icon-sm:disabled {
   opacity: 0.35;
 }
 .icon-sm.has-adjust {
   background: var(--yellow);
+  border-color: var(--yellow);
 }
 .link-btn {
   background: none;
   border: none;
-  color: var(--red);
+  color: var(--ink);
   font: inherit;
   font-size: 12px;
+  font-weight: 600;
   text-decoration: underline;
+  text-decoration-color: var(--yellow);
+  text-decoration-thickness: 2px;
+  text-underline-offset: 3px;
   cursor: pointer;
   padding: 2px 0;
 }
@@ -150,14 +183,15 @@
 .num-input {
   font: inherit;
   font-size: 15px;
-  padding: 4px 6px !important;
-  border: 2px solid var(--navy) !important;
+  padding: 5px 8px !important;
+  border: 1px solid var(--line) !important;
+  border-radius: 8px !important;
   text-align: right;
   font-variant-numeric: tabular-nums;
 }
 .time-input.bad {
   border-color: var(--red) !important;
-  background: #fde3e0 !important;
+  background: var(--red-soft) !important;
 }
 
 .mini-table {
@@ -167,15 +201,15 @@
 }
 .mini-table td,
 .mini-table th {
-  padding: 3px 6px;
-  border-bottom: 1px solid rgba(29, 35, 64, 0.12);
+  padding: 4px 6px;
+  border-bottom: 1px solid var(--mist);
   text-align: left;
 }
 .mini-table th {
-  font-size: 11px;
+  font-size: 10px;
   text-transform: uppercase;
-  letter-spacing: 0.08em;
-  color: #5b6180;
+  letter-spacing: 0.1em;
+  color: var(--muted);
 }
 
 /* Stopur */
@@ -185,13 +219,23 @@
   justify-content: space-between;
   gap: 12px;
   flex-wrap: wrap;
-  background: var(--navy);
-  color: var(--paper);
-  padding: 10px 14px;
-  border: 3px solid var(--navy);
+  background: var(--ink);
+  color: var(--white);
+  padding: 12px 16px;
+  border-radius: 14px;
+}
+.stopwatch-head .clock-face {
+  font-family: var(--display);
+  font-weight: 700;
 }
 .stopwatch-head .btn-ghost {
-  background: var(--paper);
+  background: transparent;
+  color: var(--white);
+  border-color: rgba(255, 255, 255, 0.25);
+}
+.stopwatch-head .btn-ghost:hover:not(:disabled) {
+  background: rgba(255, 255, 255, 0.1);
+  border-color: rgba(255, 255, 255, 0.4);
 }
 .clock-face {
   font-variant-numeric: tabular-nums;
@@ -219,35 +263,50 @@
   font-size: 15px;
   text-align: left;
   padding: 10px 10px;
-  background: var(--yellow);
-  color: var(--navy);
-  border: 3px solid var(--navy);
-  box-shadow: 3px 3px 0 var(--navy);
+  background: var(--white);
+  color: var(--ink);
+  border: 1px solid var(--line);
+  border-radius: 12px;
   cursor: pointer;
   min-height: 52px;
+  transition:
+    background 120ms,
+    border-color 120ms;
+}
+.split-btn:hover:not(:disabled),
+.toggle:hover:not(:disabled) {
+  border-color: var(--ink);
+}
+.split:not(.done) .split-btn:not(:disabled) {
+  background: var(--yellow);
+  border-color: var(--yellow);
 }
 .split-btn:disabled {
   cursor: default;
-  box-shadow: none;
 }
 .split:not(.done) .split-btn:disabled {
-  background: #efe6cf;
-  opacity: 0.7;
+  background: var(--bg);
+  color: var(--muted);
 }
 .split.done .split-btn {
   background: var(--green);
-  color: #fff;
+  border-color: var(--green);
+  color: var(--white);
+}
+.split.done .split-btn {
+  border-radius: 12px 0 0 12px;
 }
 .split-no {
   width: 24px;
   height: 24px;
-  border-radius: 50%;
-  background: var(--navy);
+  border-radius: 6px;
+  background: var(--ink);
   color: var(--yellow);
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  font-size: 12px;
+  font-family: var(--display);
+  font-size: 14px;
   flex: none;
 }
 .split-name {
@@ -261,21 +320,25 @@
   font-variant-numeric: tabular-nums;
 }
 .split-clear {
-  border: 3px solid var(--navy);
-  border-left: none;
-  background: var(--paper);
-  width: 30px;
+  border: 1px solid var(--green);
+  border-left: 1px solid rgba(255, 255, 255, 0.35);
+  border-radius: 0 12px 12px 0;
+  background: var(--green);
+  color: var(--white);
+  width: 32px;
   cursor: pointer;
 }
-.toggle {
-  background: #fff;
+.split-clear:hover {
+  background: var(--red);
+  border-color: var(--red);
 }
 .toggle.on {
   background: var(--green);
-  color: #fff;
+  border-color: var(--green);
+  color: var(--white);
 }
 .toggle:disabled {
-  opacity: 0.6;
+  opacity: 0.5;
   cursor: not-allowed;
 }
 
@@ -288,10 +351,11 @@
 .order-list li {
   display: flex;
   align-items: center;
-  gap: 6px;
-  padding: 5px 6px;
-  background: #fff;
-  border: 2px solid var(--navy);
+  gap: 8px;
+  padding: 6px 8px;
+  background: var(--white);
+  border: 1px solid var(--line);
+  border-radius: 10px;
   margin-bottom: 4px;
   cursor: grab;
 }
@@ -300,22 +364,26 @@
 }
 .order-list .place {
   width: 28px;
-  color: var(--red);
+  color: var(--ink);
+  font-family: var(--display);
+  font-weight: 800;
   font-size: 18px;
 }
 .drag {
-  color: #8a8fa8;
+  color: var(--muted-dark);
 }
 .tie-box {
-  background: #fff6dc;
-  border: 2px dashed var(--red);
-  padding: 8px 10px;
+  background: var(--yellow-soft);
+  border: 1px solid #f1d25a;
+  border-radius: 12px;
+  padding: 10px 12px;
   margin: 8px 0;
 }
 .pill {
   display: inline-block;
-  padding: 4px 10px;
-  background: var(--navy);
+  padding: 3px 10px;
+  border-radius: 999px;
+  background: var(--ink);
   color: var(--yellow);
   font-weight: 700;
 }
@@ -328,9 +396,9 @@
   margin-bottom: 4px;
 }
 .carrot-helper {
-  background: #fff;
-  border: 2px solid var(--navy);
-  padding: 8px 10px;
+  background: var(--bg);
+  border-radius: 12px;
+  padding: 10px 12px;
   margin: 6px 0;
 }
 .carrot-third {
@@ -341,30 +409,30 @@
   margin: 6px 0 0;
   padding-left: 18px;
   font-size: 13px;
-  line-height: 1.35;
+  line-height: 1.4;
+  color: var(--ink-3);
 }
 
 /* Udbrudsforsøget (højere/lavere) i panelet */
 .highlow-panel {
-  background: #fff;
-  border: 3px solid var(--navy);
-  box-shadow: 4px 4px 0 var(--navy);
-  padding: 10px 12px;
+  background: var(--bg);
+  border-radius: 14px;
+  padding: 12px 14px;
   margin-top: 10px;
   display: flex;
   flex-direction: column;
-  gap: 10px;
+  gap: 12px;
 }
 .highlow-cards {
   display: flex;
-  gap: 8px;
+  gap: 10px;
   flex-wrap: wrap;
-  padding: 2px 6px 6px 0;
+  padding: 4px 6px 8px 4px;
 }
 .highlow-buttons .btn {
   flex: 1;
   font-size: 20px;
-  min-height: 56px;
+  min-height: 58px;
 }
 
 /* Bracket */
@@ -382,34 +450,39 @@
   min-width: 130px;
 }
 .bracket-title {
-  font-size: 11px;
+  font-size: 10px;
   font-weight: 700;
-  letter-spacing: 0.12em;
+  letter-spacing: 0.14em;
   text-transform: uppercase;
-  color: var(--red);
+  color: var(--muted);
 }
 .duel {
   display: flex;
   flex-direction: column;
-  gap: 2px;
-  border-left: 3px solid var(--navy);
-  padding-left: 6px;
+  gap: 3px;
+  border-left: 2px solid var(--line);
+  padding-left: 8px;
 }
 .duelist {
   font: inherit;
   text-align: left;
   font-weight: 700;
-  padding: 6px 8px;
-  background: #fff;
-  border: 2px solid var(--navy);
-  color: var(--navy);
+  padding: 6px 9px;
+  background: var(--white);
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  color: var(--ink);
 }
 button.duelist {
   cursor: pointer;
 }
+button.duelist:hover {
+  border-color: var(--ink);
+}
 .duelist.win {
   background: var(--green);
-  color: #fff;
+  border-color: var(--green);
+  color: var(--white);
 }
 .duelist.lose {
   opacity: 0.45;
@@ -422,7 +495,8 @@ button.duelist {
 }
 .duel.champion .duelist {
   background: var(--yellow);
-  color: var(--navy);
+  border-color: var(--yellow);
+  color: var(--ink);
 }
 .win-msg {
   font-weight: 700;
@@ -431,7 +505,7 @@ button.duelist {
 
 /* Bracket på scenen */
 .bracket.big {
-  gap: 60px;
+  gap: 64px;
   height: 100%;
   overflow: visible;
 }
@@ -440,28 +514,31 @@ button.duelist {
   gap: 30px;
 }
 .bracket.big .bracket-title {
-  font-size: 24px;
-  color: var(--yellow);
+  font-size: 20px;
+  color: var(--muted-dark);
 }
 .bracket.big .duel {
-  border-left: 6px solid var(--yellow);
-  padding-left: 14px;
+  border-left: 4px solid var(--ink-3);
+  padding-left: 16px;
   gap: 8px;
 }
 .bracket.big .duelist {
-  font-size: 34px;
-  padding: 12px 20px;
-  border: 4px solid var(--paper);
-  background: var(--navy2);
-  color: var(--paper);
+  font-family: var(--display);
+  text-transform: uppercase;
+  font-size: 40px;
+  padding: 12px 22px;
+  border: none;
+  border-radius: 14px;
+  background: var(--ink-2);
+  color: var(--white);
 }
 .bracket.big .duelist.win {
   background: var(--green);
 }
 .bracket.big .duel.champion .duelist {
   background: var(--yellow);
-  color: var(--navy);
-  font-size: 44px;
+  color: var(--ink);
+  font-size: 52px;
 }
 
 /* Resultat */
@@ -475,25 +552,25 @@ button.duelist {
   border-collapse: collapse;
 }
 .result-table th {
-  font-size: 11px;
+  font-size: 10px;
   text-transform: uppercase;
-  letter-spacing: 0.08em;
-  color: #5b6180;
+  letter-spacing: 0.1em;
+  color: var(--muted);
   text-align: left;
-  padding: 3px 4px;
+  padding: 4px 4px;
 }
 .result-table td {
-  padding: 5px 4px;
-  border-top: 1px solid rgba(29, 35, 64, 0.15);
+  padding: 6px 4px;
+  border-top: 1px solid var(--mist);
   vertical-align: top;
 }
 .result-table td.num {
-  color: var(--red);
-  font-size: 16px;
+  color: var(--ink);
+  font-size: 17px;
   width: 30px;
 }
 .result-table tr.missing td {
-  background: #fdeee9;
+  background: var(--red-soft);
 }
 .tie-flag {
   color: var(--red);
@@ -501,7 +578,7 @@ button.duelist {
 }
 .notes {
   font-size: 12px;
-  color: #5b6180;
+  color: var(--muted);
   margin-top: 2px;
 }
 .adjust {
@@ -509,8 +586,9 @@ button.duelist {
   flex-wrap: wrap;
   gap: 6px;
   margin-top: 6px;
-  padding: 6px;
-  background: #fff6dc;
+  padding: 8px;
+  border-radius: 10px;
+  background: var(--yellow-soft);
 }
 .adjust label {
   display: flex;
@@ -522,27 +600,32 @@ button.duelist {
 .adjust input {
   padding: 4px 6px !important;
   font-size: 14px !important;
-  border-width: 2px !important;
 }
 
 /* ---------- Projektor-overlays (på 1920×1080-scenen) ---------- */
 .proj-close {
   position: absolute;
-  right: 24px;
-  top: 24px;
-  width: 56px;
-  height: 56px;
+  right: 28px;
+  top: 28px;
+  width: 60px;
+  height: 60px;
   font-size: 36px;
-  background: var(--navy);
-  color: var(--paper);
-  border: 3px solid var(--paper);
+  line-height: 1;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.12);
+  color: var(--white);
+  border: none;
   cursor: pointer;
   z-index: 5;
+}
+.proj-close:hover {
+  background: var(--yellow);
+  color: var(--ink);
 }
 .proj-dim {
   position: absolute;
   inset: 0;
-  background: rgba(11, 14, 28, 0.72);
+  background: rgba(8, 9, 11, 0.7);
   z-index: 20;
   display: flex;
   align-items: center;
@@ -552,34 +635,40 @@ button.duelist {
   position: absolute;
   inset: 0;
   z-index: 20;
-  background: var(--navy);
-  color: var(--paper);
+  background: var(--ink);
+  color: var(--white);
   display: flex;
   flex-direction: column;
   align-items: center;
   padding-top: 110px;
 }
 .proj-stopwatch .kicker {
-  font-size: 30px;
+  font-size: 26px;
 }
 .proj-stopwatch .clock-face {
-  margin: 30px 0 40px;
+  font-family: var(--display);
+  font-weight: 700;
+  margin: 24px 0 50px;
 }
 .proj-splits {
   list-style: none;
   padding: 0;
   margin: 0;
   display: grid;
-  grid-template-columns: repeat(2, 640px);
-  gap: 14px 60px;
-  font-size: 40px;
+  grid-template-columns: repeat(2, 680px);
+  gap: 0 80px;
+  font-size: 42px;
   font-weight: 700;
 }
 .proj-splits li {
   display: flex;
-  gap: 18px;
-  border-bottom: 3px solid var(--navy2);
-  padding-bottom: 6px;
+  align-items: baseline;
+  gap: 22px;
+  border-bottom: 2px solid var(--ink-3);
+  padding: 12px 0;
+}
+.proj-splits li .num {
+  font-size: 48px;
 }
 .proj-splits li span:nth-child(2) {
   flex: 1;
@@ -589,9 +678,9 @@ button.duelist {
 /* Udbrudsforsøget på skærmen */
 .proj-cards {
   position: absolute;
-  left: 86px;
-  top: 330px;
-  right: 560px;
+  left: 96px;
+  top: 360px;
+  right: 580px;
   display: flex;
   gap: 18px;
   align-items: center;
@@ -600,11 +689,11 @@ button.duelist {
   display: flex;
   align-items: center;
   gap: 18px;
-  animation: card-in 260ms ease-out both;
+  animation: card-in 280ms ease-out both;
 }
 .proj-guess {
   font-size: 44px;
-  color: var(--paper);
+  color: var(--muted-dark);
 }
 .proj-guess.ok {
   color: var(--green);
@@ -614,14 +703,14 @@ button.duelist {
 }
 .proj-highlow-status {
   position: absolute;
-  left: 86px;
-  top: 680px;
+  left: 96px;
+  top: 720px;
   margin: 0;
-  font-family: var(--head);
-  font-style: italic;
+  font-family: var(--display);
   font-weight: 800;
-  font-variation-settings: 'opsz' 24;
-  font-size: 88px;
+  text-transform: uppercase;
+  font-size: 104px;
+  line-height: 1;
   color: var(--yellow);
 }
 .proj-highlow-status.out {
@@ -633,18 +722,17 @@ button.duelist {
 }
 .proj-board {
   position: absolute;
-  right: 86px;
-  top: 300px;
-  width: 420px;
-  background: var(--navy2);
-  border: 3px solid var(--paper);
-  box-shadow: 10px 10px 0 #0b0e1c;
-  padding: 24px 28px;
-  color: var(--paper);
+  right: 96px;
+  top: 330px;
+  width: 440px;
+  background: var(--ink-2);
+  border-radius: var(--radius);
+  padding: 28px 30px;
+  color: var(--white);
 }
 .proj-board ol {
   list-style: none;
-  margin: 14px 0 0;
+  margin: 12px 0 0;
   padding: 0;
   font-size: 34px;
   font-weight: 700;
@@ -652,8 +740,11 @@ button.duelist {
 .proj-board li {
   display: flex;
   gap: 16px;
-  padding: 6px 0;
-  border-bottom: 2px solid rgba(243, 233, 210, 0.15);
+  padding: 10px 0;
+  border-bottom: 2px solid var(--ink-3);
+}
+.proj-board li:last-child {
+  border-bottom: none;
 }
 .proj-board li .grow {
   white-space: nowrap;
@@ -662,19 +753,23 @@ button.duelist {
 
 @keyframes card-in {
   from {
-    transform: scale(0.85) rotate(-2deg);
+    transform: translateY(20px) scale(0.92);
     opacity: 0;
   }
 }
 .proj-carrot {
   position: relative;
   width: 1500px;
-  background: var(--paper);
-  border: 6px solid var(--navy);
-  box-shadow: 16px 16px 0 #0b0e1c;
-  padding: 60px 80px;
+  background: var(--white);
+  border-radius: 28px;
+  box-shadow: 0 30px 80px rgba(0, 0, 0, 0.4);
+  padding: 64px 80px;
   text-align: center;
-  animation: card-in 260ms ease-out both;
+  animation: card-in 280ms ease-out both;
+}
+.proj-carrot .proj-close {
+  background: var(--bg);
+  color: var(--ink);
 }
 
 /* Vinokourov-mirakel: stor animation */
@@ -682,8 +777,8 @@ button.duelist {
   position: absolute;
   inset: 0;
   z-index: 25;
-  background: var(--red);
-  color: var(--paper);
+  background: var(--yellow);
+  color: var(--ink);
   overflow: hidden;
   display: flex;
   flex-direction: column;
@@ -692,6 +787,10 @@ button.duelist {
   text-align: center;
   animation: fade-in 200ms ease-out both;
 }
+.proj-vino .proj-close {
+  background: rgba(17, 18, 21, 0.12);
+  color: var(--ink);
+}
 .vino-rays {
   position: absolute;
   left: 50%;
@@ -699,7 +798,7 @@ button.duelist {
   width: 3000px;
   height: 3000px;
   margin: -1500px 0 0 -1500px;
-  background: repeating-conic-gradient(from 0deg, rgba(242, 183, 5, 0.35) 0deg 10deg, transparent 10deg 20deg);
+  background: repeating-conic-gradient(from 0deg, rgba(255, 255, 255, 0.4) 0deg 10deg, transparent 10deg 20deg);
   animation: rays 18s linear infinite;
 }
 @keyframes rays {
@@ -710,18 +809,16 @@ button.duelist {
 .vino-kicker {
   position: relative;
   font-weight: 700;
-  font-size: 34px;
+  font-size: 30px;
   letter-spacing: 0.3em;
   text-transform: uppercase;
   margin: 0;
-  color: var(--yellow);
 }
 .vino-title {
   position: relative;
-  font-size: 170px;
-  color: var(--yellow);
-  text-shadow: 10px 10px 0 var(--navy);
-  margin: 10px 0 40px;
+  font-size: 190px;
+  color: var(--ink);
+  margin: 16px 0 44px;
   animation: vino-pop 900ms cubic-bezier(0.2, 1.6, 0.4, 1) both;
 }
 @keyframes vino-pop {
@@ -742,15 +839,19 @@ button.duelist {
   display: flex;
   align-items: center;
   gap: 50px;
+  text-align: left;
+  background: var(--ink);
+  color: var(--white);
+  border-radius: 28px;
+  padding: 30px 50px 30px 30px;
   animation: fade-in 400ms 600ms ease-out both;
 }
 .vino-rider img {
-  width: 240px;
-  height: 240px;
+  width: 220px;
+  height: 220px;
   object-fit: cover;
   border-radius: 50%;
-  border: 8px solid var(--paper);
-  box-shadow: 10px 10px 0 var(--navy);
+  border: 6px solid var(--yellow);
 }
 .vino-dice {
   position: relative;
@@ -758,7 +859,7 @@ button.duelist {
   align-items: center;
   gap: 30px;
   margin-top: 50px;
-  font-size: 110px;
+  font-size: 120px;
   animation: vino-pop 700ms 300ms cubic-bezier(0.2, 1.6, 0.4, 1) both;
 }
 
@@ -773,8 +874,8 @@ button.duelist {
 .remote-app {
   height: 100%;
   overflow-y: auto;
-  background: var(--paper);
-  color: var(--navy);
+  background: var(--bg);
+  color: var(--ink);
   font-size: 15px;
   -webkit-text-size-adjust: 100%;
 }
@@ -782,27 +883,30 @@ button.duelist {
   position: sticky;
   top: 0;
   z-index: 5;
-  background: var(--navy);
-  color: var(--paper);
-  padding: 10px 14px 8px;
+  background: var(--ink);
+  color: var(--white);
+  padding: 12px 16px 10px;
 }
 .remote-bar strong {
-  font-family: var(--head);
-  font-style: italic;
-  font-size: 19px;
+  font-family: var(--display);
+  font-weight: 800;
+  text-transform: uppercase;
+  font-size: 20px;
+  line-height: 1.1;
+  letter-spacing: 0.01em;
   color: var(--yellow);
 }
 .remote-bar .muted {
-  color: #b9bfd8;
+  color: var(--muted-dark);
 }
 .remote-wait {
   padding: 30px 16px;
   font-size: 18px;
 }
 .remote-slides {
-  padding: 10px 14px;
-  border-bottom: 3px solid var(--navy);
-  background: #ece0c3;
+  padding: 12px 16px;
+  border-bottom: 1px solid var(--line);
+  background: var(--white);
   display: flex;
   flex-direction: column;
   gap: 8px;
@@ -810,9 +914,11 @@ button.duelist {
 .remote-slides select {
   font: inherit;
   font-size: 16px;
-  padding: 10px 8px;
-  border: 3px solid var(--navy);
-  background: #fff;
+  padding: 10px 10px;
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  background: var(--white);
+  color: var(--ink);
   min-width: 0;
 }
 .remote-nav {
@@ -826,13 +932,18 @@ button.duelist {
   width: auto;
   height: auto;
   border-left: none;
+  box-shadow: none;
+  background: var(--bg);
   animation: none;
 }
 .commissioner.embedded .editor-body {
   overflow: visible;
 }
+.commissioner.embedded .stage-tabs {
+  background: var(--white);
+}
 .remote-app .btn {
-  min-height: 40px;
+  min-height: 42px;
 }
 .remote-app .split-grid,
 .remote-app .toggle-grid {

@@ -12,22 +12,22 @@ export function StandingsSlide({ page, afterStage }: SlideProps & { afterStage: 
   const counted = standings.countedStages.includes(afterStage);
   const winners = counted ? (result?.rows.filter((r) => r.place === 1).map((r) => riders.find((x) => x.id === r.riderId)?.name) ?? []) : [];
   return (
-    <div className="slide bg-paper">
+    <div className="slide bg-light">
       <div className="slide-head">
         <h1 className="h-title">Stillingen efter etape {afterStage}</h1>
-        <p className="lead" style={{ marginTop: 30 }}>
+        <p className="lead" style={{ marginTop: 24 }}>
           {stage?.name}
           {!counted && ' · resultaterne er ikke indtastet endnu'}
           {winners.length > 0 && (
             <>
               {' · '}
-              {winners.length > 1 ? 'Delt etapesejr' : 'Etapevinder'}: <strong>{winners.join(' & ')}</strong>
+              {winners.length > 1 ? 'Delt etapesejr' : 'Etapevinder'}: <strong style={{ color: 'var(--ink)' }}>{winners.join(' & ')}</strong>
             </>
           )}
           {counted && result && !result.complete && ' · foreløbigt (etapen mangler data)'}
         </p>
       </div>
-      <StandingsBoard standings={standings} top={270} />
+      <StandingsBoard standings={standings} top={300} />
       <SlideFooter page={page} />
     </div>
   );
