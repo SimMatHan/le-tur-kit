@@ -1,8 +1,8 @@
 import type { ReactNode } from 'react';
 import type { Content, Stage } from '../content/types';
-import { HardShadowCard } from './HardShadowCard';
+import { Card } from './Card';
 import { BeerIcon, CarrotIcon, DiceIcon } from './icons';
-import { Medallion } from './Medallion';
+import { NumberTag } from './NumberTag';
 import { PointsCard, type PointsRow } from './PointsCard';
 import { SlideFooter } from './SlideFooter';
 import { FitText } from './FitText';
@@ -36,13 +36,15 @@ export function stagePointsCard(stage: Stage, content: Content, compact = false)
 
 function InfoBar({ icon, label, children }: { icon: ReactNode; label: string; children: ReactNode }) {
   return (
-    <HardShadowCard tone="navy" border={false} shadow="lg" style={{ display: 'flex', alignItems: 'center', gap: 32, padding: '28px 44px', minHeight: 140 }}>
+    <Card tone="ink" style={{ display: 'flex', alignItems: 'center', gap: 30, padding: '28px 40px', minHeight: 132 }}>
       <span style={{ flex: 'none', display: 'flex' }}>{icon}</span>
-      <div style={{ fontSize: 30, lineHeight: 1.3 }}>
-        <span style={{ color: 'var(--yellow)', fontWeight: 700, letterSpacing: '0.06em', marginRight: 18 }}>{label}</span>
+      <div style={{ fontSize: 28, lineHeight: 1.35 }}>
+        <span className="kicker c-yellow" style={{ fontSize: 20, marginRight: 16 }}>
+          {label}
+        </span>
         {children}
       </div>
-    </HardShadowCard>
+    </Card>
   );
 }
 
@@ -52,51 +54,55 @@ export function StageRoute({ stage, content, page, action }: { stage: Stage; con
   // Mange trin: trinene får hele venstre side, og rekvisitter flytter til højre kolonne.
   const crowded = stage.steps.length > 4 && !isChamps;
   const bar = stage.note ? (
-    <InfoBar icon={<CarrotIcon size={70} color="var(--yellow)" />} label="OBS!">
+    <InfoBar icon={<CarrotIcon size={64} color="var(--yellow)" />} label="OBS!">
       {stage.note.replace(/^OBS!\s*/, '')}
     </InfoBar>
   ) : (
-    <InfoBar icon={isChamps ? <DiceIcon size={64} /> : <BeerIcon size={64} />} label="REKVISITTER">
+    <InfoBar icon={isChamps ? <DiceIcon size={60} /> : <BeerIcon size={60} />} label="REKVISITTER">
       {stage.props}
     </InfoBar>
   );
   return (
-    <div className="slide bg-paper">
+    <div className="slide bg-light">
       <div className="slide-head">
-        <h1 className="h-title">Ruten: {stage.name}</h1>
+        <p className="kicker c-muted" style={{ fontSize: 22 }}>
+          Etape {stage.n} · Ruten
+        </p>
+        <h1 className="h-title" style={{ marginTop: 14 }}>
+          {stage.name}
+        </h1>
       </div>
-      <Medallion value={stage.n} size={128} valueSize={60} style={{ position: 'absolute', left: 1710, top: 55 }} />
 
-      <div style={{ position: 'absolute', left: 84, top: 248, width: 1050, height: crowded ? 720 : 530, display: 'flex' }}>
-        <FitText max={30} min={22} style={{ width: '100%', height: '100%' }}>
-          <ol style={{ listStyle: 'none', margin: 0, padding: '14px 0 0', display: 'flex', flexDirection: 'column', gap: '1.2em' }}>
+      <div style={{ position: 'absolute', left: 96, top: 300, width: 1010, height: crowded ? 660 : 470, display: 'flex' }}>
+        <FitText max={30} min={20} style={{ width: '100%', height: '100%' }}>
+          <ol style={{ listStyle: 'none', margin: 0, padding: 0, display: 'flex', flexDirection: 'column', gap: '1.1em' }}>
             {stage.steps.map((s, i) => (
-              <li key={i} style={{ display: 'flex', gap: 34, alignItems: 'flex-start', lineHeight: 1.32 }}>
-                <Medallion value={i + 1} color="navy" size={84} valueSize={38} ringColor="var(--navy)" style={{ marginTop: -14 }} />
-                <span style={{ paddingTop: 4 }}>{s}</span>
+              <li key={i} style={{ display: 'flex', gap: 30, alignItems: 'flex-start', lineHeight: 1.38 }}>
+                <NumberTag value={i + 1} size={56} style={{ marginTop: -6 }} />
+                <span style={{ paddingTop: 4, fontWeight: 500 }}>{s}</span>
               </li>
             ))}
           </ol>
         </FitText>
       </div>
 
-      {!crowded && <div style={{ position: 'absolute', left: 84, top: 798, width: 1042 }}>{bar}</div>}
+      {!crowded && <div style={{ position: 'absolute', left: 96, top: 800, width: 1010 }}>{bar}</div>}
 
-      <div style={{ position: 'absolute', left: 1193, top: 250, width: 642, display: 'flex', flexDirection: 'column', gap: 40 }}>
+      <div style={{ position: 'absolute', left: 1180, top: 290, width: 644, display: 'flex', flexDirection: 'column', gap: 28 }}>
         {stagePointsCard(stage, content, isChamps || crowded)}
         {crowded && bar}
         {isChamps && stage.vinokourov && (
-          <HardShadowCard tone="navy" border={false} shadow="lg" style={{ padding: '28px 40px', display: 'flex', gap: 28, alignItems: 'flex-start' }}>
+          <Card tone="ink" style={{ padding: '26px 36px', display: 'flex', gap: 26, alignItems: 'flex-start' }}>
             <span style={{ flex: 'none' }}>
-              <DiceIcon size={60} />
+              <DiceIcon size={56} />
             </span>
             <div>
-              <p className="kicker c-yellow" style={{ fontSize: 22 }}>
+              <p className="kicker c-yellow" style={{ fontSize: 19 }}>
                 Vinokourov-mirakel
               </p>
-              <p style={{ fontSize: 28, lineHeight: 1.3, margin: '12px 0 0' }}>{stage.vinokourov}</p>
+              <p style={{ fontSize: 26, lineHeight: 1.32, margin: '10px 0 0' }}>{stage.vinokourov}</p>
             </div>
-          </HardShadowCard>
+          </Card>
         )}
       </div>
       {action}

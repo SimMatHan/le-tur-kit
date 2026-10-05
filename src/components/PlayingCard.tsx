@@ -2,13 +2,13 @@ import type { CSSProperties } from 'react';
 import { isRed, suitOf } from '../game/highlow';
 import type { Card } from '../game/types';
 
-/** Spillekort i plakatstil: hvid med hård skygge, rød/navy farve efter kulør. */
+/** Spillekort: hvidt med blød skygge, rød/sort efter kulør. Grøn/rød ring viser, om gættet holdt. */
 export function PlayingCard({ card, width = 160, state, style }: { card: Card; width?: number; state?: 'ok' | 'fail'; style?: CSSProperties }) {
   const h = Math.round(width * 1.4);
   const rank = card.slice(0, -1);
   const suit = suitOf(card);
-  const color = isRed(card) ? 'var(--red)' : 'var(--navy)';
-  const border = state === 'fail' ? 'var(--red)' : state === 'ok' ? 'var(--green)' : 'var(--navy)';
+  const color = isRed(card) ? 'var(--red)' : 'var(--ink)';
+  const ring = state === 'fail' ? 'var(--red)' : state === 'ok' ? 'var(--green)' : null;
   return (
     <div
       className="playing-card"
@@ -17,8 +17,10 @@ export function PlayingCard({ card, width = 160, state, style }: { card: Card; w
         width,
         height: h,
         borderRadius: width * 0.08,
-        border: `${Math.max(3, Math.round(width * 0.03))}px solid ${border}`,
-        boxShadow: `${Math.round(width * 0.05)}px ${Math.round(width * 0.05)}px 0 var(--navy)`,
+        boxShadow: [
+          ring ? `0 0 0 ${Math.max(3, Math.round(width * 0.035))}px ${ring}` : 'inset 0 0 0 1px var(--line)',
+          `0 ${Math.round(width * 0.04)}px ${Math.round(width * 0.12)}px rgba(17,18,21,0.25)`,
+        ].join(', '),
         background: '#fff',
         color,
         position: 'relative',

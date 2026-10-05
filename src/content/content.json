@@ -11,19 +11,20 @@
     "ridersTagline": "{antal} ryttere. Fem etaper. Ingen nåde."
   },
   "theme": {
-    "navy": "#1D2340",
-    "navy2": "#34407A",
-    "paper": "#F3E9D2",
-    "yellow": "#F2B705",
-    "red": "#D2372B",
-    "green": "#2F9D58",
-    "headFont": "Fraunces (bold italic)",
-    "bodyFont": "Arial/system sans",
+    "ink": "#111215",
+    "white": "#FFFFFF",
+    "bg": "#F3F3EF",
+    "yellow": "#FFD200",
+    "red": "#E1251B",
+    "green": "#00A04A",
+    "headFont": "Barlow Condensed (800, versaler)",
+    "bodyFont": "Barlow",
     "motifs": [
-      "hårde forskudte skygger (5px navy, ingen blur)",
-      "runde 'medaljoner' med tal",
-      "duotone-fotos navy→rød→gul→papir med korn",
-      "prikket trøje-mønster"
+      "sort, hvid og maillot jaune-gul – minimalistisk Tour-grafik",
+      "gul fane over overskrifter",
+      "kvadratiske nummermærker og rygnumre",
+      "sort/hvide fotos (gul/sort duotone på etapeskilte)",
+      "flade kort med runde hjørner og bløde skygger"
     ]
   },
   "jerseys": [

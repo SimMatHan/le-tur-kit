@@ -2,16 +2,17 @@ import type { ReactNode } from 'react';
 import type { JerseyId, Person } from '../content/types';
 import { JerseyRow } from './JerseyBadge';
 import { FitText } from './FitText';
-import { Medallion, type MedallionColor } from './Medallion';
 import { PhotoFrame } from './PhotoFrame';
 import { SlideFooter } from './SlideFooter';
 
 interface Props {
   person: Person;
   kicker: string;
-  medallionLabel: string;
-  medallionValue: ReactNode;
-  medallionColor?: MedallionColor;
+  /** Lille tekst på rygnummeret (fx "NR.", "TOUR"). */
+  bibLabel: string;
+  bibValue: ReactNode;
+  /** Gult rygnummer (kommissæren) i stedet for hvidt. */
+  bibYellow?: boolean;
   page?: number;
   /** Ekstra lag, fx redigeringsknapper. */
   overlay?: ReactNode;
@@ -26,13 +27,11 @@ export function Chip({ children }: { children: ReactNode }) {
         display: 'inline-flex',
         alignItems: 'center',
         justifyContent: 'center',
-        minWidth: '8.7em',
-        height: '2.87em',
-        padding: '0 1.33em',
-        borderRadius: '1.45em',
-        background: 'var(--yellow)',
-        border: 'var(--border)',
-        boxShadow: '4px 4px 0 var(--navy)',
+        height: '2.4em',
+        padding: '0 1.1em',
+        borderRadius: '1.2em',
+        background: 'var(--white)',
+        boxShadow: 'inset 0 0 0 2px var(--ink)',
         fontWeight: 700,
         whiteSpace: 'nowrap',
       }}
@@ -42,58 +41,74 @@ export function Chip({ children }: { children: ReactNode }) {
   );
 }
 
-/** Præsentation af en rytter (eller kommissæren): foto, medaljon, navn, kælenavn, bio og egenskaber. */
-export function RiderSlide({ person, kicker, medallionLabel, medallionValue, medallionColor = 'red', page, overlay, leads = [] }: Props) {
+/** Rygnummer som på en rigtig Tour-trøje: hvid lap med sort tal. */
+function Bib({ label, value, yellow }: { label: string; value: ReactNode; yellow?: boolean }) {
+  const len = String(value).length;
   return (
-    <div className="slide bg-paper">
-      <PhotoFrame photo={person.photo} alt={person.name} style={{ left: 86, top: 86, width: 664, height: 864 }} />
-      <Medallion
-        value={medallionValue}
-        label={medallionLabel}
-        color={medallionColor}
-        size={206}
-        valueSize={String(medallionValue).length >= 3 ? 64 : String(medallionValue).length === 2 ? 74 : 84}
-        style={{ position: 'absolute', left: 625, top: 33 }}
-      />
+    <div
+      style={{
+        position: 'absolute',
+        left: 560,
+        top: 760,
+        width: 240,
+        height: 170,
+        borderRadius: 18,
+        background: yellow ? 'var(--yellow)' : 'var(--white)',
+        boxShadow: '0 12px 30px rgba(17,18,21,0.18)',
+        display: 'flex',
+        flexDirection: 'column',
+        alignItems: 'center',
+        justifyContent: 'center',
+        lineHeight: 0.9,
+      }}
+    >
+      <span className="kicker" style={{ fontSize: 18, letterSpacing: '0.24em', paddingLeft: '0.24em', color: yellow ? 'var(--ink)' : 'var(--muted)' }}>
+        {label}
+      </span>
+      <span className="num" style={{ fontSize: len >= 3 ? 96 : 116, fontWeight: 800, marginTop: 4 }}>
+        {value}
+      </span>
+    </div>
+  );
+}
 
-      <div style={{ position: 'absolute', left: 864, top: 118, width: 970 }}>
-        <p className="kicker c-red" style={{ fontSize: 26, display: 'flex', alignItems: 'center', gap: 22, height: 40 }}>
+/** Præsentation af en rytter (eller kommissæren): foto, rygnummer, navn, kælenavn, bio og egenskaber. */
+export function RiderSlide({ person, kicker, bibLabel, bibValue, bibYellow, page, overlay, leads = [] }: Props) {
+  return (
+    <div className="slide bg-light">
+      <PhotoFrame photo={person.photo} alt={person.name} style={{ left: 96, top: 96, width: 640, height: 820 }} />
+      <Bib label={bibLabel} value={bibValue} yellow={bibYellow} />
+
+      <div style={{ position: 'absolute', left: 880, top: 96, width: 944 }}>
+        <div style={{ width: 76, height: 10, background: 'var(--yellow)' }} />
+        <p className="kicker c-muted" style={{ fontSize: 22, display: 'flex', alignItems: 'center', gap: 20, height: 44, marginTop: 26 }}>
           {kicker}
           {leads.length > 0 && (
-            <span style={{ display: 'inline-flex', alignItems: 'center', gap: 10, color: 'var(--navy)' }}>
-              · Fører <JerseyRow jerseys={leads} size={44} gap={4} />
+            <span style={{ display: 'inline-flex', alignItems: 'center', gap: 10, color: 'var(--ink)' }}>
+              · Fører <JerseyRow jerseys={leads} size={42} gap={4} />
             </span>
           )}
         </p>
-        <FitText
-          max={92}
-          min={44}
-          className="h-display"
-          style={{ height: 150, marginTop: 24, lineHeight: 1.12, display: 'flex', alignItems: 'center', whiteSpace: 'nowrap' }}
-        >
+        <FitText bottom max={124} min={48} className="h-display" style={{ height: 200, marginTop: 10, lineHeight: 0.92, paddingBottom: '0.14em' }}>
           {person.name}
         </FitText>
         {person.nickname && (
-          <FitText
-            max={48}
-            min={28}
-            style={{ height: 70, marginTop: 4, fontFamily: 'var(--head)', fontStyle: 'italic', fontWeight: 400, color: 'var(--red)', whiteSpace: 'nowrap' }}
-          >
-            – {person.nickname}
+          <FitText max={44} min={26} style={{ height: 64, marginTop: 18, fontWeight: 600, whiteSpace: 'nowrap' }}>
+            <span className="marker">{person.nickname}</span>
           </FitText>
         )}
-        <FitText max={32} min={22} style={{ height: 240, marginTop: 30, lineHeight: 1.32 }}>
+        <FitText max={32} min={20} style={{ height: 200, marginTop: 30, lineHeight: 1.4, color: 'var(--ink-3)' }}>
           {person.bio}
         </FitText>
       </div>
 
-      <div style={{ position: 'absolute', left: 864, top: 712, width: 980 }}>
-        <p className="kicker" style={{ fontSize: 26 }}>
+      <div style={{ position: 'absolute', left: 880, top: 730, width: 960 }}>
+        <p className="kicker c-muted" style={{ fontSize: 20 }}>
           Egenskaber
         </p>
         {/* Chips er målt i em, så FitText kan skalere dem ned, hvis der er mange. */}
-        <FitText max={30} min={16} style={{ height: 214, marginTop: 30 }}>
-          <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.6em 0.87em', paddingBottom: 6, paddingRight: 6 }}>
+        <FitText max={30} min={16} style={{ height: 196, marginTop: 24 }}>
+          <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.55em 0.6em', paddingBottom: 4, paddingRight: 4 }}>
             {person.traits.map((t, i) => (
               <Chip key={i}>{t}</Chip>
             ))}

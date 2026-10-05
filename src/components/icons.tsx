@@ -1,11 +1,11 @@
-// Enkle, flade ikoner i plakatstil.
+// Enkle, flade ikoner.
 interface IconProps {
   size?: number;
   color?: string;
   bg?: string;
 }
 
-export function CameraIcon({ size = 100, color = 'var(--paper)', bg = 'var(--navy2)' }: IconProps) {
+export function CameraIcon({ size = 100, color = 'var(--white)', bg = 'var(--mist)' }: IconProps) {
   return (
     <svg width={size} height={size * 0.88} viewBox="0 0 100 88" aria-hidden>
       <rect x="30" y="0" width="40" height="18" rx="6" fill={color} />
@@ -16,7 +16,7 @@ export function CameraIcon({ size = 100, color = 'var(--paper)', bg = 'var(--nav
   );
 }
 
-export function BeerIcon({ size = 70, color = 'var(--yellow)', bg = 'var(--navy)' }: IconProps) {
+export function BeerIcon({ size = 70, color = 'var(--yellow)', bg = 'var(--ink)' }: IconProps) {
   return (
     <svg width={size} height={size} viewBox="0 0 70 70" aria-hidden>
       <rect x="0" y="0" width="50" height="70" rx="5" fill={color} />
@@ -32,12 +32,12 @@ export function CarrotIcon({ size = 80, color = 'var(--red)' }: IconProps) {
     <svg width={size} height={size} viewBox="0 0 80 80" aria-hidden>
       <path d="M16 8c8 2 12 8 14 14 2-8 8-13 16-13-2 7-6 11-12 13 7-1 13 2 16 8-7 2-13 0-17-4z" fill={color} />
       <path d="M30 24c10-6 26 2 26 14 0 6-6 12-14 18L16 76c-3 2-6-1-4-4l12-30c3-8 2-14 6-18z" fill={color} />
-      <path d="M33 38l8 4M28 50l8 3M24 61l7 3" stroke="var(--paper)" strokeWidth="3" strokeLinecap="round" />
+      <path d="M33 38l8 4M28 50l8 3M24 61l7 3" stroke="var(--white)" strokeWidth="3" strokeLinecap="round" />
     </svg>
   );
 }
 
-export function DiceIcon({ size = 70, color = 'var(--yellow)', bg = 'var(--navy)', pips = 5 }: IconProps & { pips?: number }) {
+export function DiceIcon({ size = 70, color = 'var(--yellow)', bg = 'var(--ink)', pips = 5 }: IconProps & { pips?: number }) {
   const p: Record<number, [number, number][]> = {
     1: [[35, 35]],
     2: [[20, 20], [50, 50]],
@@ -56,15 +56,7 @@ export function DiceIcon({ size = 70, color = 'var(--yellow)', bg = 'var(--navy)
   );
 }
 
-export function MusicIcon({ size = 120, color = 'var(--yellow)' }: IconProps) {
-  return (
-    <svg width={size} height={size} viewBox="0 0 120 120" aria-hidden>
-      <path d="M38 22l70-20v84h-1a18 14 0 1 1-14-14V30L50 42v56h-1a18 14 0 1 1-14-14z" fill={color} />
-    </svg>
-  );
-}
-
-export function BikeIcon({ size = 160, color = 'var(--paper)' }: IconProps) {
+export function BikeIcon({ size = 160, color = 'var(--white)' }: IconProps) {
   return (
     <svg width={size} height={size * 0.6} viewBox="0 0 160 96" aria-hidden fill="none" stroke={color} strokeWidth="11" strokeLinecap="round" strokeLinejoin="round">
       <circle cx="32" cy="64" r="25" />
@@ -74,7 +66,7 @@ export function BikeIcon({ size = 160, color = 'var(--paper)' }: IconProps) {
   );
 }
 
-export function FlagIcon({ size = 90, color = 'var(--yellow)', bg = 'var(--navy)' }: IconProps) {
+export function FlagIcon({ size = 90, color = 'var(--yellow)', bg = 'var(--ink)' }: IconProps) {
   return (
     <svg width={size} height={size} viewBox="0 0 90 90" aria-hidden>
       <circle cx="9" cy="8" r="7" fill={color} />
@@ -85,15 +77,6 @@ export function FlagIcon({ size = 90, color = 'var(--yellow)', bg = 'var(--navy)
           (r + c) % 2 === 0 ? <rect key={`${r}-${c}`} x={17 + c * 11} y={17 + r * 9 + (c % 2) * 1} width="11" height="9" fill={bg} /> : null,
         ),
       )}
-    </svg>
-  );
-}
-
-export function PlayIcon({ size = 36, color = 'var(--yellow)', bg = 'var(--navy)' }: IconProps) {
-  return (
-    <svg width={size} height={size} viewBox="0 0 36 36" aria-hidden>
-      <rect width="36" height="36" rx="5" fill={color} />
-      <path d="M13 9l14 9-14 9z" fill={bg} />
     </svg>
   );
 }

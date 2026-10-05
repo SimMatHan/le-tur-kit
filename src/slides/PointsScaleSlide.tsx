@@ -1,7 +1,7 @@
 import { useContent } from '../content/ContentContext';
-import { HardShadowCard } from '../components/HardShadowCard';
+import { Card } from '../components/Card';
 import { JerseyRow } from '../components/JerseyBadge';
-import { Medallion } from '../components/Medallion';
+import { NumberTag } from '../components/NumberTag';
 import { SlideFooter } from '../components/SlideFooter';
 import type { SlideProps } from './types';
 
@@ -10,41 +10,41 @@ export function PointsScaleSlide({ page }: SlideProps) {
   const pts = rules.placementPoints;
   const max = Math.max(...pts, 1);
   const n = pts.length;
-  const areaW = 1010;
-  const gap = 40;
-  const barW = Math.min(170, (areaW - gap * (n - 1)) / n);
-  const maxH = 500;
+  const areaW = 960;
+  const gap = 28;
+  const barW = Math.min(172, (areaW - gap * (n - 1)) / n);
+  const maxH = 480;
   return (
-    <div className="slide bg-paper">
+    <div className="slide bg-light">
       <div className="slide-head">
         <h1 className="h-title">Pointskalaen</h1>
-        <p className="lead" style={{ marginTop: 40 }}>
+        <p className="lead" style={{ marginTop: 24 }}>
           {meta.pointsSubtitle}
         </p>
       </div>
-      <div style={{ position: 'absolute', left: 115, bottom: 143, display: 'flex', alignItems: 'flex-end', gap }}>
+      <div style={{ position: 'absolute', left: 96, bottom: 150, display: 'flex', alignItems: 'flex-end', gap }}>
         {pts.map((p, i) => {
-          const h = Math.max(100, (p / max) * maxH);
+          const h = Math.max(90, (p / max) * maxH);
           const first = i === 0;
           return (
             <div key={i} style={{ width: barW, display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
-              <span className={`num ${first ? 'c-red' : ''}`} style={{ fontSize: 66, marginBottom: 10 }}>
+              <span className="num" style={{ fontSize: 76, fontWeight: 800, lineHeight: 1, marginBottom: 14 }}>
                 {p}
               </span>
               <div
                 style={{
                   width: '100%',
                   height: h,
-                  background: first ? 'var(--yellow)' : 'var(--navy)',
-                  border: first ? 'var(--border)' : undefined,
-                  boxShadow: 'var(--shadow)',
-                  color: first ? 'var(--navy)' : 'var(--paper)',
+                  borderRadius: '14px 14px 0 0',
+                  background: first ? 'var(--yellow)' : 'var(--ink)',
+                  color: first ? 'var(--ink)' : 'var(--white)',
                   display: 'flex',
                   alignItems: 'flex-end',
                   justifyContent: 'center',
                   paddingBottom: 18,
                   fontWeight: 700,
-                  fontSize: 26,
+                  fontSize: 24,
+                  letterSpacing: '0.04em',
                 }}
               >
                 {i + 1}. plads
@@ -53,22 +53,25 @@ export function PointsScaleSlide({ page }: SlideProps) {
           );
         })}
       </div>
-      <HardShadowCard tone="white" shadow="lg" style={{ position: 'absolute', left: 1193, top: 228, width: 642, height: 716, padding: '48px 40px' }}>
-        <p className="kicker c-red" style={{ fontSize: 26 }}>
+      <div style={{ position: 'absolute', left: 96, bottom: 148, width: areaW + 20, height: 2, background: 'var(--line)' }} />
+      <Card style={{ position: 'absolute', left: 1180, top: 250, width: 644, height: 700, padding: '44px 44px' }}>
+        <p className="kicker c-muted" style={{ fontSize: 20 }}>
           Hvad køres der om?
         </p>
-        <div style={{ display: 'flex', flexDirection: 'column', gap: 34, marginTop: 36 }}>
+        <div style={{ display: 'flex', flexDirection: 'column', marginTop: 22 }}>
           {stages.map((s) => (
-            <div key={s.n} style={{ display: 'flex', alignItems: 'center', gap: 28 }}>
-              <Medallion value={s.n} size={78} valueSize={34} />
-              <span style={{ fontWeight: 700, fontSize: 32, flex: 1, whiteSpace: 'nowrap' }}>{s.shortName}</span>
-              <span style={{ width: 196 }}>
-                <JerseyRow jerseys={s.atStake} size={58} gap={6} />
+            <div key={s.n} style={{ display: 'flex', alignItems: 'center', gap: 26, height: 108, borderTop: '2px solid var(--mist)' }}>
+              <NumberTag value={s.n} size={68} />
+              <span className="h-display" style={{ fontSize: 40, flex: 1, whiteSpace: 'nowrap' }}>
+                {s.shortName}
+              </span>
+              <span style={{ width: 186 }}>
+                <JerseyRow jerseys={s.atStake} size={56} gap={6} />
               </span>
             </div>
           ))}
         </div>
-      </HardShadowCard>
+      </Card>
       <SlideFooter page={page} />
     </div>
   );

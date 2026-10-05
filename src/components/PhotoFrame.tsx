@@ -10,22 +10,21 @@ interface Props {
   children?: ReactNode;
 }
 
-/** Portrætramme (ca. 4.6:6) med hård skygge – eller en pæn tom ramme. */
+/** Portrætramme (ca. 4.6:6) med runde hjørner – eller en diskret tom ramme. */
 export function PhotoFrame({ photo, alt, style, emptyLabel = 'Indsæt billede', children }: Props) {
   const url = usePhotoUrl(photo);
   return (
     <div
       style={{
         position: 'absolute',
-        background: 'var(--navy2)',
-        border: 'var(--border)',
-        boxShadow: 'var(--shadow-lg)',
+        background: 'var(--mist)',
+        borderRadius: 28,
         overflow: 'hidden',
         display: 'flex',
         flexDirection: 'column',
         alignItems: 'center',
         justifyContent: 'center',
-        gap: 28,
+        gap: 24,
         ...style,
       }}
     >
@@ -33,8 +32,8 @@ export function PhotoFrame({ photo, alt, style, emptyLabel = 'Indsæt billede', 
         <img src={url} alt={alt} draggable={false} style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', objectFit: 'cover' }} />
       ) : (
         <>
-          <CameraIcon size={100} />
-          <span style={{ color: 'var(--paper)', fontSize: 30 }}>{emptyLabel}</span>
+          <CameraIcon size={92} color="var(--muted-dark)" bg="var(--mist)" />
+          <span style={{ color: 'var(--muted)', fontSize: 28, fontWeight: 600 }}>{emptyLabel}</span>
         </>
       )}
       {children}

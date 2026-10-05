@@ -6,7 +6,7 @@ import { formatTime } from '../game/format';
 import { useGame } from '../game/GameContext';
 import { ClockFace } from '../components/Stopwatch';
 import { CarrotIcon, DiceIcon } from '../components/icons';
-import { Medallion } from '../components/Medallion';
+import { NumberTag } from '../components/NumberTag';
 import { BracketView } from './BracketView';
 import { useCommissioner } from './CommissionerContext';
 import { PlayingCard } from '../components/PlayingCard';
@@ -35,11 +35,11 @@ function StopwatchView({ stage }: { stage: number }) {
     <div className="proj-stopwatch overlay-in">
       <CloseX />
       <p className="kicker c-yellow">{s ? `Etape ${s.n} · ${s.name}` : 'Stopur'}</p>
-      <ClockFace size={240} className="c-paper" />
+      <ClockFace size={300} className="c-white" />
       <ol className="proj-splits">
         {done.map((r, i) => (
           <li key={r.id}>
-            <span className="num c-yellow">{i + 1}.</span> <span>{r.name}</span> <span className="tabular">{formatTime(times[r.id] as number)}</span>
+            <span className="num c-yellow">{i + 1}</span> <span>{r.name}</span> <span className="num tabular">{formatTime(times[r.id] as number)}</span>
           </li>
         ))}
       </ol>
@@ -72,19 +72,19 @@ function HighLowView() {
     .sort((x, y) => (y.b as number) - (x.b as number));
 
   return (
-    <div className="slide bg-navy overlay-in" style={{ zIndex: 20 }}>
+    <div className="slide bg-ink overlay-in" style={{ zIndex: 20 }}>
       <CloseX />
-      <div className="slide-head" style={{ top: 66 }}>
-        <p className="kicker c-yellow" style={{ fontSize: 26 }}>
+      <div className="slide-head" style={{ top: 72 }}>
+        <p className="kicker c-yellow" style={{ fontSize: 22 }}>
           Etape {stage.n} · Udbrudsforsøget
         </p>
-        <h1 className="h-title c-paper" style={{ marginTop: 14 }}>
+        <h1 className="h-title" style={{ marginTop: 14 }}>
           {active ? active.name : 'Hvem stikker af?'}
         </h1>
       </div>
       {run && (
         <>
-          <Medallion value={streak} label="I TRÆK" color={run.done && streak < max ? 'red' : 'yellow'} size={210} valueSize={96} style={{ position: 'absolute', left: 1180, top: 60 }} />
+          <NumberTag value={streak} label="I TRÆK" color={run.done && streak < max ? 'red' : 'yellow'} size={200} valueSize={110} style={{ position: 'absolute', left: 1180, top: 72 }} />
           <div className="proj-cards">
             {cards.map((c, i) => (
               <div key={offset + i} className="proj-card-wrap">
@@ -99,7 +99,7 @@ function HighLowView() {
         </>
       )}
       <div className="proj-board">
-        <p className="kicker c-yellow" style={{ fontSize: 20 }}>
+        <p className="kicker c-yellow" style={{ fontSize: 18 }}>
           Længste udbrud
         </p>
         <ol>
@@ -140,7 +140,7 @@ function VinokourovView() {
       </div>
       {typeof input?.vinokourovDice === 'number' && (
         <div className="vino-dice">
-          <DiceIcon size={110} color="var(--paper)" bg="var(--red)" />
+          <DiceIcon size={110} color="var(--ink)" bg="var(--yellow)" />
           <span className="num">−{input.vinokourovDice} sek</span>
         </div>
       )}
@@ -155,15 +155,15 @@ function BracketScreen() {
   const st = champs ? game.stages[champs.n] : undefined;
   const input = st?.input.type === 'champs' ? st.input : null;
   return (
-    <div className="slide bg-navy overlay-in" style={{ zIndex: 20 }}>
+    <div className="slide bg-ink overlay-in" style={{ zIndex: 20 }}>
       <CloseX />
-      <div className="slide-head" style={{ top: 66 }}>
-        <h1 className="h-title c-yellow">Knock-out på Champs-Élysées</h1>
-        <p className="lead c-paper" style={{ marginTop: 20 }}>
+      <div className="slide-head" style={{ top: 72 }}>
+        <h1 className="h-title">Knock-out på Champs-Élysées</h1>
+        <p className="lead" style={{ marginTop: 20 }}>
           Carrot in the Box – den der ender med terningen, er ude
         </p>
       </div>
-      <div style={{ position: 'absolute', left: 86, top: 260, right: 86, bottom: 80 }}>
+      <div style={{ position: 'absolute', left: 96, top: 300, right: 96, bottom: 80 }}>
         {input && <BracketView entrants={input.hits} rounds={input.rounds} big />}
       </div>
     </div>
@@ -177,12 +177,12 @@ function CarrotView({ a, b, third }: { a: string; b: string; third: string | nul
     <div className="proj-dim overlay-in">
       <div className="proj-carrot">
         <CloseX />
-        <CarrotIcon size={120} />
-        <p className="kicker c-red" style={{ fontSize: 28 }}>
+        <CarrotIcon size={110} color="#f07d00" />
+        <p className="kicker c-muted" style={{ fontSize: 24, marginTop: 18 }}>
           Carrot in the Box
         </p>
-        <div className="h-display" style={{ fontSize: 96 }}>
-          {name(a)} <span className="c-red">mod</span> {name(b)}
+        <div className="h-display" style={{ fontSize: 110, marginTop: 20 }}>
+          {name(a)} <span className="c-muted">mod</span> {name(b)}
         </div>
         {third && (
           <p style={{ fontSize: 44, marginTop: 30 }}>

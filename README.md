@@ -122,10 +122,25 @@ Konfigurationen ligger i `remote/wrangler.toml` (navn, Durable Object og app-fil
 - **Rytter-slides** viser "Fører" med trøjeikoner, når rytteren fører en trøje.
 - **Podiet** udfyldes automatisk med navne og fotos:
   - Top 3 i gul står på trappen, og vinderne af grøn og prikket står ved siden af.
-  - Uden foto vises rygnummeret som medaljon.
+  - Uden foto vises rygnummeret i stedet.
   - Indtil alle etaper er afsluttet, står der "Foreløbig stilling".
   - Når løbet er slut, kommer der konfetti. Den slås fra, hvis computeren er sat til reduceret bevægelse.
 - **Uafgjort** vises eksplicit: "1=" og "Delt plads" på trappen og "delt trøje" ved trøjerne. Kommissæren afgør det under **K → Klassement**.
+
+## Design
+
+Moderne og minimalistisk Tour-grafik i stil med letour.fr og TV 2's Tour-dækning:
+
+- **Farver:** sort (`#111215`), hvid og maillot jaune-gul (`#FFD200`). Grøn og rød bruges kun til trøjerne og til rigtigt/forkert. Alle farver er CSS-variabler i `src/styles/global.css`.
+- **Skrift:** Barlow Condensed (fed, versaler) til overskrifter og tal, og Barlow til brødtekst. Fontene ligger i appen (kun woff2, latin), så de virker offline.
+- **Gennemgående motiver:**
+  - en gul fane over overskrifterne
+  - kvadratiske nummermærker
+  - rygnumre på rytterne
+  - flade kort med runde hjørner
+- **Fotos:** De indbyggede fotos vises i sort/hvid, og på etapeskiltene som gul/sort duotone. Rytternes egne fotos vises i farver.
+
+Designet afløser plakatstilen fra `reference/le-tur-assets/design-reference.pdf`. Layoutet (1920×1080, slide-rækkefølge og indhold) er det samme.
 
 ## Regler og scoring
 
@@ -224,7 +239,7 @@ npm run verify        # tests, build, verify:dist, test:dev, check:slides og tes
 
 | Kriterium | Test |
 |---|---|
-| `dist/index.html` åbner ved dobbeltklik uden internet, og alle billeder og fonte vises | `verify:dist` (ingen eksterne ressourcer, fonte og billeder inlinet) og `check:slides` (åbner via `file://` offline, ingen netværkskald, Fraunces indlæst) |
+| `dist/index.html` åbner ved dobbeltklik uden internet, og alle billeder og fonte vises | `verify:dist` (ingen eksterne ressourcer, fonte og billeder inlinet) og `check:slides` (åbner via `file://` offline, ingen netværkskald, Barlow-fontene indlæst) |
 | Redigering af navn, tekst, egenskaber og foto overlever en genindlæsning | `test:e2e`: "Ændringer og foto er bevaret efter genindlæsning" |
 | Eksport → nulstil → import genskaber alt, inkl. fotos | `test:e2e`: eksport, nulstil og import |
 | Et komplet testløb med 6 ryttere gennem 5 etaper stemmer med en håndregning | `src/game/scoring.test.ts` (håndregningen står i kommentaren) og `test:e2e` (samme løb kørt via panelerne) |
@@ -237,7 +252,7 @@ npm run verify        # tests, build, verify:dist, test:dev, check:slides og tes
 src/
   deck.ts          rækkefølgen af slides (én linje pr. slide)
   scene/           1920×1080-scene med letterbox, navigation, oversigt, klassement-overlay
-  components/      Medallion, HardShadowCard, JerseyBadge, StageDivider, StageRoute, PointsCard,
+  components/      NumberTag, Card, JerseyBadge, StageDivider, StageRoute, PointsCard,
                    RiderSlide, Stopwatch, Podium, ElevationProfile, FitText, Confetti …
   slides/          én komponent pr. slidetype
   content/         content.json (standardindhold + regler), typer, billeder, lagring,
@@ -249,7 +264,7 @@ src/
 public/_headers    headers til Cloudflare Pages
 remote/            Cloudflare Worker + Durable Object (relæ) og wrangler.toml
 scripts/           check-slides, e2e, verify-dist og fælles testdata
-reference/         design-reference.pdf, de oprindelige filer og det oprindelige content.json
+reference/         design-reference.pdf (det oprindelige plakatdesign), de oprindelige filer og det oprindelige content.json
 ```
 
 ### Tilføj en slide

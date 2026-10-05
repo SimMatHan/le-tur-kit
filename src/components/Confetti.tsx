@@ -1,6 +1,6 @@
 import { useMemo } from 'react';
 
-const colors = ['var(--yellow)', 'var(--red)', 'var(--green)', 'var(--paper)', '#ffffff'];
+const colors = ['var(--yellow)', 'var(--yellow)', 'var(--red)', 'var(--green)', '#ffffff'];
 
 /** Deterministisk "tilfældighed", så konfettien ser ens ud i miniaturer og ved genindlæsning. */
 function rng(seed: number) {

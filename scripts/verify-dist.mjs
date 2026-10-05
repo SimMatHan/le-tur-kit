@@ -21,7 +21,7 @@ for (const m of html.matchAll(/<(script|link|img|source)\b[^>]*\b(src|href)=["']
   if (!m[3].startsWith('data:') && !m[3].startsWith('#')) problems.push(`Ekstern ressource i <${m[1]}>: ${m[3]}`);
 }
 if (/<script[^>]+type=["']module["'][^>]*src=/i.test(html)) problems.push('Modul-script med src (virker ikke via file://)');
-if (!/@font-face/.test(html) || !/data:font\/woff2/.test(html)) problems.push('Fraunces er ikke inlinet som data-URL');
+if (!/@font-face/.test(html) || !/data:font\/woff2/.test(html)) problems.push('Fontene (Barlow) er ikke inlinet som data-URL');
 if (!/data:image\/jpeg;base64/.test(html)) problems.push('Billeder er ikke inlinet');
 
 const extra = readdirSync('dist').filter((f) => f !== 'index.html' && f !== '_headers');

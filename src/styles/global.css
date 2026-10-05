@@ -1,31 +1,80 @@
-@import '@fontsource-variable/fraunces/standard-italic.css';
-
-:root {
-  --navy: #1d2340;
-  --navy2: #34407a;
-  --paper: #f3e9d2;
-  --yellow: #f2b705;
-  --red: #d2372b;
-  --green: #2f9d58;
-  --white: #ffffff;
-
-  --head: 'Fraunces Variable', 'Fraunces', Georgia, 'Times New Roman', serif;
-  --body: Arial, 'Helvetica Neue', Helvetica, system-ui, sans-serif;
-
-  /* Hårde, forskudte skygger – ingen blur */
-  --shadow-lg: 12px 12px 0 var(--navy);
-  --shadow: 8px 8px 0 var(--navy);
-  --shadow-sm: 5px 5px 0 var(--navy);
-  --border: 5px solid var(--navy);
-
-  --fade-ms: 220ms;
+/*
+ * Designsystem: moderne, minimalistisk Tour-grafik (inspireret af letour.fr og
+ * TV 2's Tour-dækning). Sort, hvid og maillot jaune-gul, kondenseret grotesk
+ * til overskrifter og tal, bløde flader uden hårde skygger.
+ *
+ * Fontene er selvhostede (kun latin, kun woff2), så de inlines i dist/index.html.
+ */
+@font-face {
+  font-family: 'Barlow';
+  font-weight: 400;
+  font-display: swap;
+  src: url('@fontsource/barlow/files/barlow-latin-400-normal.woff2') format('woff2');
+}
+@font-face {
+  font-family: 'Barlow';
+  font-weight: 500;
+  font-display: swap;
+  src: url('@fontsource/barlow/files/barlow-latin-500-normal.woff2') format('woff2');
+}
+@font-face {
+  font-family: 'Barlow';
+  font-weight: 600;
+  font-display: swap;
+  src: url('@fontsource/barlow/files/barlow-latin-600-normal.woff2') format('woff2');
+}
+@font-face {
+  font-family: 'Barlow';
+  font-weight: 700;
+  font-display: swap;
+  src: url('@fontsource/barlow/files/barlow-latin-700-normal.woff2') format('woff2');
+}
+@font-face {
+  font-family: 'Barlow Condensed';
+  font-weight: 600;
+  font-display: swap;
+  src: url('@fontsource/barlow-condensed/files/barlow-condensed-latin-600-normal.woff2') format('woff2');
+}
+@font-face {
+  font-family: 'Barlow Condensed';
+  font-weight: 700;
+  font-display: swap;
+  src: url('@fontsource/barlow-condensed/files/barlow-condensed-latin-700-normal.woff2') format('woff2');
+}
+@font-face {
+  font-family: 'Barlow Condensed';
+  font-weight: 800;
+  font-display: swap;
+  src: url('@fontsource/barlow-condensed/files/barlow-condensed-latin-800-normal.woff2') format('woff2');
 }
 
-/* Fraunces med lav optisk størrelse: kraftigere streger, plakat-agtigt */
-.h-title,
-.h-display,
-.num {
-  font-variation-settings: 'opsz' 24;
+:root {
+  --ink: #111215;
+  --ink-2: #1c1d22;
+  --ink-3: #2b2c33;
+  --white: #ffffff;
+  --bg: #f3f3ef;
+  --mist: #e9e9e3;
+  --line: #dcdcd4;
+  --muted: #6c6d73;
+  --muted-dark: #9a9ba3;
+  --yellow: #ffd200;
+  --yellow-soft: #fff4b8;
+  --green: #00a04a;
+  --green-soft: #ddf3e5;
+  --red: #e1251b;
+  --red-soft: #fde6e4;
+
+  --display: 'Barlow Condensed', 'Arial Narrow', 'Helvetica Neue', Arial, sans-serif;
+  --body: 'Barlow', 'Helvetica Neue', Arial, system-ui, sans-serif;
+
+  --radius: 20px;
+  --radius-sm: 12px;
+  /* Bløde skygger (kun til kort på lys baggrund) */
+  --shadow: 0 1px 2px rgba(17, 18, 21, 0.06), 0 10px 30px rgba(17, 18, 21, 0.07);
+  --shadow-ui: 0 1px 2px rgba(17, 18, 21, 0.08), 0 8px 24px rgba(17, 18, 21, 0.12);
+
+  --fade-ms: 240ms;
 }
 
 * {
@@ -38,9 +87,10 @@ body,
   margin: 0;
   height: 100%;
   overflow: hidden;
-  background: #0b0e1c;
-  color: var(--navy);
+  background: #08090b;
+  color: var(--ink);
   font-family: var(--body);
+  -webkit-font-smoothing: antialiased;
 }
 
 button {
@@ -51,65 +101,74 @@ button {
 /* ---------- Typografi (på 1920×1080-scenen) ---------- */
 
 .h-title {
-  font-family: var(--head);
-  font-style: italic;
+  font-family: var(--display);
   font-weight: 800;
-  font-size: 80px;
-  line-height: 1.05;
+  font-size: 96px;
+  line-height: 0.95;
   margin: 0;
-  letter-spacing: -0.01em;
+  text-transform: uppercase;
+  letter-spacing: -0.005em;
 }
 
 .h-display {
-  font-family: var(--head);
-  font-style: italic;
+  font-family: var(--display);
   font-weight: 800;
   margin: 0;
-  line-height: 1;
+  line-height: 0.95;
+  text-transform: uppercase;
 }
 
 .kicker {
   font-family: var(--body);
   font-weight: 700;
-  font-size: 22px;
-  letter-spacing: 0.22em;
+  font-size: 20px;
+  letter-spacing: 0.16em;
   text-transform: uppercase;
   margin: 0;
 }
 
 .lead {
   font-family: var(--body);
-  font-style: italic;
+  font-weight: 500;
   font-size: 30px;
   margin: 0;
+  color: var(--muted);
 }
 
 .body {
   font-family: var(--body);
   font-size: 30px;
-  line-height: 1.35;
+  line-height: 1.4;
   margin: 0;
 }
 
 .num {
-  font-family: var(--head);
-  font-style: italic;
-  font-weight: 800;
+  font-family: var(--display);
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+}
+
+/* Gul markering bag et ord (som tekstmarkør) */
+.marker {
+  background: linear-gradient(transparent 58%, var(--yellow) 58%, var(--yellow) 92%, transparent 92%);
+  padding: 0 0.12em;
+  -webkit-box-decoration-break: clone;
+  box-decoration-break: clone;
 }
 
 /* ---------- Scene-baggrunde ---------- */
 
-.bg-paper {
-  background: var(--paper);
-  color: var(--navy);
+.bg-light {
+  background: var(--bg);
+  color: var(--ink);
 }
-.bg-navy {
-  background: var(--navy);
-  color: var(--paper);
+.bg-ink {
+  background: var(--ink);
+  color: var(--white);
 }
 .bg-yellow {
   background: var(--yellow);
-  color: var(--navy);
+  color: var(--ink);
 }
 
 .c-red {
@@ -118,11 +177,27 @@ button {
 .c-yellow {
   color: var(--yellow);
 }
-.c-paper {
-  color: var(--paper);
+.c-white {
+  color: var(--white);
 }
-.c-navy {
-  color: var(--navy);
+.c-ink {
+  color: var(--ink);
+}
+.c-muted {
+  color: var(--muted);
+}
+.bg-ink .c-muted,
+.bg-ink .lead {
+  color: var(--muted-dark);
+}
+
+/* Indbyggede fotos: sort/hvid. På gul baggrund bliver de gul/sort duotone. */
+.photo-bw {
+  filter: grayscale(1) contrast(1.12);
+}
+.photo-duo {
+  filter: grayscale(1) contrast(1.25) brightness(1.05);
+  mix-blend-mode: multiply;
 }
 
 /* Fælles rammer for indholdsslides */
@@ -134,25 +209,51 @@ button {
 
 .slide-head {
   position: absolute;
-  left: 86px;
-  top: 76px;
-  right: 86px;
+  left: 96px;
+  top: 84px;
+  right: 96px;
+}
+/* Gul fane over overskriften – gennemgående signatur */
+.slide-head::before,
+.tab-mark::before {
+  content: '';
+  display: block;
+  width: 76px;
+  height: 10px;
+  background: var(--yellow);
+  margin-bottom: 30px;
 }
 
 .slide-footer {
   position: absolute;
-  left: 86px;
-  right: 100px;
+  left: 96px;
+  right: 96px;
   bottom: 40px;
   display: flex;
   justify-content: space-between;
-  align-items: baseline;
+  align-items: center;
   font-family: var(--body);
-  font-size: 20px;
+  font-size: 18px;
+  color: var(--muted);
 }
 .slide-footer .brand {
+  display: inline-flex;
+  align-items: center;
+  gap: 14px;
   font-weight: 700;
-  letter-spacing: 0.22em;
+  letter-spacing: 0.2em;
+}
+.slide-footer .brand::before {
+  content: '';
+  width: 14px;
+  height: 14px;
+  background: var(--yellow);
+}
+.slide-footer .page {
+  font-family: var(--display);
+  font-weight: 700;
+  font-size: 22px;
+  font-variant-numeric: tabular-nums;
 }
 
 @media (prefers-reduced-motion: reduce) {

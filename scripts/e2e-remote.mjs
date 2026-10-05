@@ -82,7 +82,8 @@ await screen.addInitScript((c) => {
 }, { riders });
 await screen.goto(pathToFileURL(resolve('dist/index.html')).href + '#/1');
 await screen.waitForSelector('.scene');
-const screenText = () => screen.locator('.scene').innerText();
+// Små bogstaver: overskrifter står med versaler via CSS, og innerText følger text-transform.
+const screenText = async () => (await screen.locator('.scene').innerText()).toLowerCase();
 const screenGame = () => screen.evaluate(() => JSON.parse(localStorage.getItem('le-tur-2026:game') || '{}'));
 
 let link;
@@ -121,7 +122,7 @@ await step('Slides styres fra telefonen (næste og spring til slide)', async () 
   const opts = await phone.locator('select[aria-label="Gå til slide"] option').allInnerTexts();
   const idx = opts.findIndex((t) => t.includes('Ruten: Prolog'));
   await phone.selectOption('select[aria-label="Gå til slide"]', String(idx));
-  await until(async () => (await screenText()).includes('Ruten: Prolog'), 'skærmen viser ikke Ruten: Prolog');
+  await until(async () => (await screenText()).includes('etape 1 · ruten'), 'skærmen viser ikke ruten for etape 1');
   // Panelet følger etapen
   await until(async () => (await panel.locator('.stage-head').innerText()).includes('Etape 1'), 'panelet fulgte ikke etapen');
 });
@@ -134,9 +135,9 @@ await step('Tider tastet på telefonen giver klassementet på skærmen', async (
   }
   await until(async () => Object.keys((await screenGame()).stages?.[1]?.input?.times ?? {}).length === 6, 'tiderne nåede ikke skærmen');
   await phone.getByRole('button', { name: 'Vis klassement' }).click();
-  await until(async () => /Klassementet/.test(await screenText()) && (await screenText()).includes('7,9'), 'klassementet vises ikke på skærmen');
+  await until(async () => /klassementet/.test(await screenText()) && (await screenText()).includes('7,9'), 'klassementet vises ikke på skærmen');
   await phone.getByRole('button', { name: 'Skjul klassement' }).click();
-  await until(async () => !/Klassementet/.test(await screenText()), 'klassementet blev ikke skjult');
+  await until(async () => !/klassementet/.test(await screenText()), 'klassementet blev ikke skjult');
 });
 
 await step('Fortryd på telefonen fortryder på skærmen', async () => {
@@ -168,13 +169,13 @@ await step('Udbrudsforsøget: telefonen trækker kort, skærmen viser dem', asyn
   await phone.locator('.stage-tab', { hasText: /^3/ }).click();
   await phone.evaluate(() => (Math.random = () => 0.99)); // sorteret bunke: 2♠, 3♠, 4♠ …
   await panel.locator('.toggle', { hasText: 'Erik' }).click();
-  await until(async () => /Udbrudsforsøget/i.test(await screenText()) && (await screenText()).includes('Erik'), 'udbrudsforsøget vises ikke på skærmen');
+  await until(async () => /Udbrudsforsøget/i.test(await screenText()) && (await screenText()).includes('erik'), 'udbrudsforsøget vises ikke på skærmen');
   await panel.getByRole('button', { name: '▲ Højere' }).click();
   await panel.getByRole('button', { name: '▲ Højere' }).click();
   await until(async () => (await screen.locator('.playing-card').count()) === 3, 'kortene vises ikke på skærmen');
   await shot(phone, 'remote-phone-udbrud');
   await panel.getByRole('button', { name: '▼ Lavere' }).click();
-  await until(async () => (await screenText()).includes('Hentet af feltet!'), 'skærmen viser ikke, at rytteren er hentet');
+  await until(async () => (await screenText()).includes('hentet af feltet!'), 'skærmen viser ikke, at rytteren er hentet');
   await shot(screen, 'remote-screen-udbrud');
   await until(async () => (await screenGame()).stages?.[3]?.input?.runs?.r5?.done === true, 'forsøget nåede ikke skærmen');
   await phone.getByRole('button', { name: 'Luk overlay på skærmen' }).click();

@@ -9,33 +9,20 @@ export const numberWord = (n: number) => words[n] ?? String(n);
 export function RidersIntroSlide(_: SlideProps) {
   const { meta, riders } = useContent();
   return (
-    <div className="slide bg-navy">
-      <img src={ridersImage} alt="" draggable={false} style={{ position: 'absolute', left: 0, top: 0, width: 864, height: 1080, objectFit: 'cover' }} />
-      <div
-        style={{
-          position: 'absolute',
-          left: 719,
-          top: 718,
-          width: 290,
-          height: 290,
-          borderRadius: '50%',
-          background: 'var(--red)',
-          border: '5px solid var(--paper)',
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-        }}
-      >
-        <BikeIcon size={160} />
-      </div>
-      <div style={{ position: 'absolute', left: 1008, top: 259, width: 820 }}>
-        <p className="kicker c-paper" style={{ fontSize: 26, letterSpacing: '0.3em' }}>
+    <div className="slide bg-ink">
+      <img src={ridersImage} alt="" draggable={false} className="photo-bw" style={{ position: 'absolute', left: 0, top: 0, width: 880, height: 1080, objectFit: 'cover' }} />
+      <div style={{ position: 'absolute', left: 470, top: 0, width: 420, height: 1080, background: 'linear-gradient(270deg, var(--ink) 0, var(--ink) 4%, rgba(17,18,21,0))' }} />
+      <div style={{ position: 'absolute', left: 1000, top: 250, width: 830 }}>
+        <BikeIcon size={120} color="var(--yellow)" />
+        <p className="kicker" style={{ fontSize: 24, letterSpacing: '0.3em', marginTop: 40, color: 'var(--muted-dark)' }}>
           Præsentation af
         </p>
-        <h1 className="h-display c-yellow" style={{ fontSize: 124, marginTop: 34 }}>
-          Årets ryttere
+        <h1 className="h-display" style={{ fontSize: 180, marginTop: 56, lineHeight: 0.88 }}>
+          Årets
+          <br />
+          <span className="c-yellow">ryttere</span>
         </h1>
-        <p className="lead c-paper" style={{ fontSize: 38, marginTop: 160 }}>
+        <p style={{ fontSize: 36, fontWeight: 500, marginTop: 56, color: 'var(--muted-dark)' }}>
           {meta.ridersTagline.replace('{antal}', numberWord(riders.length))}
         </p>
       </div>
