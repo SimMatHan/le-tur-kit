@@ -16,7 +16,6 @@ export interface Meta {
   title: string;
   year: number;
   tagline: string;
-  playlistUrl: string;
   footer: string;
   kicker: string;
   jerseysNote: string;
@@ -82,15 +81,15 @@ export interface SprintScoring {
   timePenaltyBeyondScale: 'repeatLast' | 'zero';
   bonuses: Bonus[];
 }
+/** Udbrudsforsøget (højere/lavere): placering efter længste udbrud. */
 export interface UdbrudScoring {
   type: 'udbrud';
   placementPointsTo: JerseyId;
-  quizCorrectAnswerSec: number;
-  quizRowBjergpoint: number[];
-  quizRowPoint: number[];
-  quizMaxBjergpoint: number;
-  quizMaxPoint: number;
-  placementBy: 'stageTime';
+  /** Sekunder pr. rigtigt gæt (negativt = bonus). */
+  secPerCorrect: number;
+  bjergpointPerCorrect: number;
+  /** Højst så mange rigtige gæt tæller (tid og bjergpoint). */
+  maxCountedCorrect: number;
 }
 export interface BjergScoring {
   type: 'bjerg';
@@ -125,12 +124,6 @@ export interface Stage {
   props: string;
 }
 
-export interface QuizCategory {
-  name: string;
-  prompt: string;
-  answers: string[];
-}
-
 export interface Content {
   meta: Meta;
   theme: Theme;
@@ -140,6 +133,5 @@ export interface Content {
   commissioner: Commissioner;
   stages: Stage[];
   carrotInTheBox: { usedFor: string; subtitle: string; steps: string[] };
-  quiz: { orderNote: string; categories: QuizCategory[] };
   podium: { title: string; kicker: string };
 }

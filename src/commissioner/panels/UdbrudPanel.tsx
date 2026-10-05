@@ -1,166 +1,117 @@
-import { useEffect, useRef } from 'react';
-import { useContent } from '../../content/ContentContext';
-import { Stopwatch } from '../../components/Stopwatch';
-import { quizTotals } from '../../game/scoring';
-import { cellKey, songNumber } from '../../game/quiz';
+import { PlayingCard } from '../../components/PlayingCard';
+import { breakawayOf, guessNext, isCorrect, startRun, streakOf } from '../../game/highlow';
 import { useCommissioner } from '../CommissionerContext';
-import { RiderToggles, TimeInput } from '../fields';
+import { NumberInput } from '../fields';
 import { useStagePanel } from '../useStagePanel';
 
-/** Etape 3 – Udbrud: musikquiz (bræt + kort) og terningkast på tid. */
+/**
+ * Etape 3 – Udbrudsforsøget (højere/lavere). Appen trækker kortene: vælg rytter,
+ * tryk Højere/Lavere for rytterens gæt. Ved rigtige kort tastes antal rigtige manuelt.
+ */
 export function UdbrudPanel({ n }: { n: number }) {
-  const { stage, input, setInput, riders } = useStagePanel(n, 'udbrud');
-  const { quiz, meta } = useContent();
-  const { projector, setProjector } = useCommissioner();
-  const counts = quiz.categories.map((c) => c.answers.length);
-  const open = projector?.kind === 'quiz' ? projector : null;
-  const key = open ? cellKey(open.cat, open.row) : null;
-  const totals = quizTotals(input, stage);
+  const { stage, input, setInput, riders, nameOf } = useStagePanel(n, 'udbrud');
+  const { setProjector } = useCommissioner();
   const sc = stage.scoring.type === 'udbrud' ? stage.scoring : null;
-  // Vis det åbne kort (vigtigt på telefonen, hvor brættet fylder skærmen).
-  const cardRef = useRef<HTMLDivElement>(null);
-  useEffect(() => {
-    if (key) cardRef.current?.scrollIntoView?.({ block: 'nearest', behavior: 'smooth' });
-  }, [key]);
+  const max = sc?.maxCountedCorrect ?? 10;
+  const active = input.active && riders.some((r) => r.id === input.active) ? input.active : null;
+  const run = active ? input.runs[active] : undefined;
+  const streak = streakOf(run);
 
-  const openCell = (cat: number, row: number) => setProjector({ kind: 'quiz', cat, row, reveal: false });
-  const closeCard = () => {
-    if (key) setInput((i) => (key in i.quiz ? i : { ...i, quiz: { ...i.quiz, [key]: [] } }));
-    setProjector(null);
+  const start = (id: string) => {
+    const has = input.runs[id] || typeof input.manual[id] === 'number';
+    if (has && !confirm(`${nameOf(id)} har allerede et udbrud. Start forfra?`)) return;
+    setInput((i) => startRun(i, id));
+    setProjector({ kind: 'highlow' });
   };
-  const toggle = (id: string) =>
-    key &&
-    setInput((i) => {
-      const cur = i.quiz[key] ?? [];
-      return { ...i, quiz: { ...i.quiz, [key]: cur.includes(id) ? cur.filter((x) => x !== id) : [...cur, id] } };
-    });
-  const setDice = (id: string, v: number | null) => setInput((i) => ({ ...i, dice: { ...i.dice, [id]: v } }));
+  const guess = (g: 'op' | 'ned') => active && setInput((i) => guessNext(i, active, g, max));
+  const nextRider = riders.find((r) => breakawayOf(input, r.id) === null && !(input.runs[r.id] && !input.runs[r.id].done));
+
+  const lastCorrect =
+    run && run.cards.length > 1 ? isCorrect(run.cards[run.cards.length - 2], run.cards[run.cards.length - 1], run.guesses[run.guesses.length - 1]) : null;
 
   return (
     <>
       <section className="panel-section">
-        <h3>Musikquiz</h3>
+        <h3>Udbrudsforsøget – appen trækker kortene</h3>
         <p className="hint">
-          Klik på et felt for at vise kortet på skærmen. Svaret ses kun her, indtil du vælger at vise det.{' '}
-          <a href={meta.playlistUrl} target="_blank" rel="noreferrer">
-            Åbn playlisten på Spotify
-          </a>
+          Vælg rytteren. Han siger "højere" eller "lavere", og du trykker det samme. Forkert gæt (eller samme værdi) = hentet af feltet. Højst {max} rigtige tæller.
         </p>
-        <div className="mini-board" style={{ gridTemplateColumns: `repeat(${quiz.categories.length}, 1fr)` }}>
-          {quiz.categories.map((c, ci) => (
-            <div key={ci} className="mini-col">
-              <div className="mini-head" title={c.prompt}>
-                {c.name}
-              </div>
-              {c.answers.map((_, ri) => {
-                const k = cellKey(ci, ri);
-                const used = k in input.quiz;
-                const nCorrect = input.quiz[k]?.length ?? 0;
-                return (
-                  <button
-                    key={ri}
-                    type="button"
-                    className={`mini-cell ${used ? 'used' : ''} ${k === key ? 'open' : ''}`}
-                    onClick={() => openCell(ci, ri)}
-                    title={`Sang nr. ${songNumber(counts, ci, ri)}`}
-                  >
-                    {ri + 1}
-                    {used && <small>{nCorrect ? ` ✓${nCorrect}` : ' –'}</small>}
-                  </button>
-                );
-              })}
-            </div>
-          ))}
+        <div className="toggle-grid">
+          {riders.map((r) => {
+            const b = breakawayOf(input, r.id);
+            const running = input.runs[r.id] && !input.runs[r.id].done && typeof input.manual[r.id] !== 'number';
+            return (
+              <button key={r.id} type="button" className={`toggle ${r.id === active ? 'on' : ''}`} onClick={() => start(r.id)} aria-pressed={r.id === active}>
+                <span className="split-no">{r.number}</span>
+                <span className="split-name">{r.name}</span>
+                <span>{running ? '…' : b === null ? '–' : `${b} ✓`}</span>
+              </button>
+            );
+          })}
         </div>
 
-        {open && key && (
-          <div className="quiz-card-panel" ref={cardRef}>
+        {active && run && (
+          <div className="highlow-panel">
             <div className="row wrap">
               <strong className="grow">
-                {quiz.categories[open.cat].name} · felt {open.row + 1} · sang nr. {songNumber(counts, open.cat, open.row)}
+                {nameOf(active)}: {streak} rigtige i træk
               </strong>
-              {sc && (
-                <small>
-                  +{sc.quizRowBjergpoint[open.row] ?? 0} bjergpoint, +{sc.quizRowPoint[open.row] ?? 0} point, {sc.quizCorrectAnswerSec} sek
-                </small>
-              )}
+              <button type="button" className="btn btn-small btn-ghost" onClick={() => setProjector({ kind: 'highlow' })}>
+                Vis på skærm
+              </button>
             </div>
-            <details className="answer">
-              <summary>Vis svar (kun her)</summary>
-              <p>{quiz.categories[open.cat].answers[open.row]}</p>
-            </details>
-            <p className="hint">Hvem svarede rigtigt?</p>
-            <RiderToggles riders={riders} selected={input.quiz[key] ?? []} onToggle={toggle} />
-            <div className="row wrap" style={{ marginTop: 8 }}>
-              <button type="button" className="btn" onClick={closeCard}>
-                Luk kort (marker brugt)
-              </button>
-              <button type="button" className="btn btn-ghost" onClick={() => setProjector({ ...open, reveal: !open.reveal })}>
-                {open.reveal ? 'Skjul svar på skærmen' : 'Vis svar på skærmen'}
-              </button>
-              {key in input.quiz && (
-                <button
-                  type="button"
-                  className="btn btn-ghost"
-                  onClick={() =>
-                    setInput((i) => {
-                      const q = { ...i.quiz };
-                      delete q[key];
-                      return { ...i, quiz: q };
-                    })
-                  }
-                >
-                  Nulstil felt
+            <div className="highlow-cards">
+              {run.cards.slice(-5).map((c, i, arr) => (
+                <PlayingCard
+                  key={run.cards.length - arr.length + i}
+                  card={c}
+                  width={64}
+                  state={i === arr.length - 1 && lastCorrect !== null ? (lastCorrect ? 'ok' : 'fail') : undefined}
+                />
+              ))}
+            </div>
+            {!run.done ? (
+              <div className="row highlow-buttons">
+                <button type="button" className="btn btn-big" onClick={() => guess('op')}>
+                  ▲ Højere
                 </button>
-              )}
-            </div>
+                <button type="button" className="btn btn-big" onClick={() => guess('ned')}>
+                  ▼ Lavere
+                </button>
+              </div>
+            ) : (
+              <div className="row wrap">
+                <p className={streak >= max ? 'win-msg' : 'error'} style={{ margin: 0 }}>
+                  {streak >= max ? `Helt alene foran – maks. udbrud (${max})!` : `Hentet af feltet efter ${streak} rigtige. Skål!`}
+                </p>
+                {nextRider && (
+                  <button type="button" className="btn" onClick={() => start(nextRider.id)}>
+                    Næste: {nextRider.name}
+                  </button>
+                )}
+              </div>
+            )}
           </div>
         )}
-
-        <table className="mini-table" style={{ marginTop: 10 }}>
-          <thead>
-            <tr>
-              <th>Rytter</th>
-              <th>Rigtige</th>
-              <th>Bjerg</th>
-              <th>Point</th>
-              <th>Sek</th>
-            </tr>
-          </thead>
-          <tbody>
-            {riders.map((r) => {
-              const t = totals.get(r.id);
-              return (
-                <tr key={r.id}>
-                  <td>{r.name}</td>
-                  <td>{t?.correct ?? 0}</td>
-                  <td>{t?.prik ?? 0}</td>
-                  <td>{t?.gron ?? 0}</td>
-                  <td>{t ? (t.t10 / 10).toString().replace('.', ',').replace('-', '−') : 0}</td>
-                </tr>
-              );
-            })}
-          </tbody>
-        </table>
       </section>
 
       <section className="panel-section">
-        <h3>Terningkast om tiden</h3>
-        <Stopwatch
-          riders={riders}
-          times={input.dice}
-          onSplit={setDice}
-          onClear={(id) => setDice(id, null)}
-          startOnFirstSplit
-          onShowOnProjector={() => setProjector({ kind: 'stopwatch', stage: n })}
-        />
+        <h3>Manuelt (med rigtige kort)</h3>
+        <p className="hint">Antal rigtige gæt i træk. Et tal her går forud for forsøget i appen.</p>
         <table className="mini-table">
           <tbody>
             {riders.map((r) => (
               <tr key={r.id}>
                 <td>{r.name}</td>
                 <td>
-                  <TimeInput label={`Terningtid for ${r.name}`} value={input.dice[r.id]} onCommit={(v) => setDice(r.id, v)} />
+                  <NumberInput
+                    label={`Udbrud for ${r.name}`}
+                    value={input.manual[r.id] ?? null}
+                    min={0}
+                    max={52}
+                    onCommit={(v) => setInput((i) => ({ ...i, manual: { ...i.manual, [r.id]: v } }))}
+                  />{' '}
+                  rigtige
                 </td>
               </tr>
             ))}

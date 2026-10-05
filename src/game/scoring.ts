@@ -1,8 +1,9 @@
 // Scoringsmotoren: rene funktioner uden React. Alle regler (pointskala,
-// tidstillæg, bonusser, quizværdier, bonussekunder, tiebreak) læses fra
+// tidstillæg, bonusser, udbrudsværdier, bonussekunder, tiebreak) læses fra
 // content.json – intet er hardcodet her.
 import type { Content, JerseyId, Rider, Rules, Stage, StageScoring } from '../content/types';
 import { bracketStatus } from './bracket';
+import { breakawayOf } from './highlow';
 import type {
   BjergInput,
   ChampsInput,
@@ -125,40 +126,32 @@ function scoreSprint(input: SprintInput, ids: RiderId[], stage: Stage, rules: Ru
   }
 }
 
-/** Quizresultat pr. rytter: antal rigtige, bjergpoint, point og sekunder. */
-export function quizTotals(input: UdbrudInput, stage: Stage) {
-  const sc = stage.scoring;
-  const out = new Map<RiderId, { correct: number; prik: number; gron: number; t10: number }>();
-  if (sc.type !== 'udbrud') return out;
-  for (const [cell, riders] of Object.entries(input.quiz)) {
-    const row = Number(cell.split('-')[1]);
-    if (!Number.isInteger(row)) continue;
-    for (const id of new Set(riders)) {
-      const cur = out.get(id) ?? { correct: 0, prik: 0, gron: 0, t10: 0 };
-      cur.correct++;
-      cur.prik += sc.quizRowBjergpoint[row] ?? 0;
-      cur.gron += sc.quizRowPoint[row] ?? 0;
-      cur.t10 += toTenths(sc.quizCorrectAnswerSec);
-      out.set(id, cur);
-    }
-  }
-  return out;
-}
-
+/**
+ * Udbrudsforsøget (højere/lavere): længste udbrud vinder etapen. Hvert rigtigt gæt
+ * giver sekunder og bjergpoint, dog højst maxCountedCorrect.
+ */
 function scoreUdbrud(input: UdbrudInput, ids: RiderId[], stage: Stage, rules: Rules, tieOrder: RiderId[], rows: Map<RiderId, StageRiderResult>) {
-  const quiz = quizTotals(input, stage);
-  const t = new Map<RiderId, number>();
+  const sc = stage.scoring;
+  if (sc.type !== 'udbrud') return;
+  const streaks = new Map<RiderId, number>();
   for (const id of ids) {
-    const q = quiz.get(id);
-    if (q && rows.has(id)) {
-      const row = rows.get(id)!;
-      row.gron += q.gron;
-      row.prik += q.prik;
-      row.notes.push(`Quiz: ${q.correct} rigtige (${fmt(q.t10)}, +${q.gron} point, +${q.prik} bjergpoint)`);
-    }
-    if (isNum(input.dice[id])) t.set(id, toTenths(input.dice[id]!) + (q?.t10 ?? 0));
+    const b = breakawayOf(input, id);
+    if (b !== null) streaks.set(id, b);
   }
-  placeByTime(rows, t, stage.scoring, rules, tieOrder);
+  const ranked = rankBy([...streaks].map(([id, key]) => ({ id, key })), 'desc', tieOrder);
+  for (const [id, n] of streaks) {
+    const row = rows.get(id)!;
+    const r = ranked.get(id)!;
+    const counted = Math.min(n, sc.maxCountedCorrect);
+    row.place = r.place;
+    row.tiedWith = r.tiedWith;
+    row.missing = false;
+    // + 0 undgår "−0" ved 0 rigtige
+    row.timeSec = fromTenths(toTenths(sc.secPerCorrect) * counted) + 0;
+    row.prik += sc.bjergpointPerCorrect * counted;
+    addPoints(row, sc.placementPointsTo, pointsForPlace(r.place, rules));
+    row.notes.push(`Udbrud: ${n} rigtige${n > counted ? ` (${counted} tæller)` : ''}`);
+  }
 }
 
 function scoreBjerg(input: BjergInput, ids: RiderId[], stage: Stage, rules: Rules, tieOrder: RiderId[], rows: Map<RiderId, StageRiderResult>) {
@@ -241,7 +234,7 @@ export function emptyInput(type: StageInput['type']): StageInput {
     case 'sprint':
       return { type, order: [], carrotGroups: [], bonuses: {} };
     case 'udbrud':
-      return { type, quiz: {}, dice: {} };
+      return { type, runs: {}, manual: {}, deck: [], active: null };
     case 'bjerg':
       return { type, hits: [], dice: {}, times: {} };
     case 'champs':
@@ -348,7 +341,7 @@ function stageHasData(st: StageState | undefined): boolean {
     case 'sprint':
       return i.order.length > 0 || any(i.bonuses);
     case 'udbrud':
-      return any(i.quiz) || any(i.dice);
+      return any(i.runs) || any(i.manual);
     case 'bjerg':
       return i.hits.length > 0 || any(i.times);
     case 'champs':

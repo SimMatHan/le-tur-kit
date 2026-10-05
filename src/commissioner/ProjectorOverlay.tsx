@@ -1,15 +1,16 @@
-// Det, publikum ser på scenen: stort stopur, quizkort, bracket, Vinokourov-mirakel
+// Det, publikum ser på scenen: stort stopur, udbrudsforsøget (højere/lavere), bracket, Vinokourov-mirakel
 // og Carrot in the Box-duel. Tegnes på 1920×1080-scenen oven på sliden.
 import { useContent } from '../content/ContentContext';
 import { usePhotoUrl } from '../content/photos';
 import { formatTime } from '../game/format';
 import { useGame } from '../game/GameContext';
 import { ClockFace } from '../components/Stopwatch';
-import { CarrotIcon, DiceIcon, MusicIcon } from '../components/icons';
+import { CarrotIcon, DiceIcon } from '../components/icons';
 import { Medallion } from '../components/Medallion';
 import { BracketView } from './BracketView';
 import { useCommissioner } from './CommissionerContext';
-import { songNumber } from '../game/quiz';
+import { PlayingCard } from '../components/PlayingCard';
+import { breakawayOf, isCorrect, streakOf } from '../game/highlow';
 
 function CloseX() {
   const { setProjector } = useCommissioner();
@@ -26,7 +27,7 @@ function StopwatchView({ stage }: { stage: number }) {
   const st = game.stages[stage];
   const s = stages.find((x) => x.n === stage);
   const times: Record<string, number | null | undefined> =
-    st?.input.type === 'prolog' ? st.input.times : st?.input.type === 'udbrud' ? st.input.dice : st?.input.type === 'bjerg' ? st.input.times : {};
+    st?.input.type === 'prolog' ? st.input.times : st?.input.type === 'bjerg' ? st.input.times : {};
   const done = riders
     .filter((r) => typeof times[r.id] === 'number')
     .sort((a, b) => (times[a.id] as number) - (times[b.id] as number));
@@ -46,36 +47,69 @@ function StopwatchView({ stage }: { stage: number }) {
   );
 }
 
-function QuizCardView({ cat, row, reveal }: { cat: number; row: number; reveal: boolean }) {
-  const { quiz } = useContent();
-  const c = quiz.categories[cat];
-  if (!c) return null;
-  const counts = quiz.categories.map((x) => x.answers.length);
+/** Udbrudsforsøget på skærmen: rytterens kort, udbruddets længde og stillingen. */
+function HighLowView() {
+  const { game } = useGame();
+  const { riders, stages } = useContent();
+  const stage = stages.find((s) => s.scoring.type === 'udbrud');
+  const st = stage ? game.stages[stage.n] : undefined;
+  const input = st?.input.type === 'udbrud' ? st.input : null;
+  if (!stage || !input) return null;
+  const max = stage.scoring.type === 'udbrud' ? stage.scoring.maxCountedCorrect : 10;
+  const active = riders.find((r) => r.id === input.active);
+  const run = active ? input.runs[active.id] : undefined;
+  const streak = streakOf(run);
+  const cards = run?.cards.slice(-6) ?? [];
+  const offset = (run?.cards.length ?? 0) - cards.length;
+  const verdict = (i: number) => {
+    const k = offset + i;
+    if (!run || k === 0) return undefined;
+    return isCorrect(run.cards[k - 1], run.cards[k], run.guesses[k - 1]) ? 'ok' : 'fail';
+  };
+  const board = riders
+    .map((r) => ({ r, b: breakawayOf(input, r.id) }))
+    .filter((x) => x.b !== null)
+    .sort((x, y) => (y.b as number) - (x.b as number));
+
   return (
-    <div className="proj-dim overlay-in">
-      <div className="proj-quiz">
-        <CloseX />
-        <div className="proj-quiz-head">
-          <MusicIcon size={80} color="var(--navy)" />
-          <div>
-            <div className="h-display" style={{ fontSize: 76 }}>
-              {c.name}
-            </div>
-            <div style={{ fontSize: 34, marginTop: 6 }}>{c.prompt}</div>
+    <div className="slide bg-navy overlay-in" style={{ zIndex: 20 }}>
+      <CloseX />
+      <div className="slide-head" style={{ top: 66 }}>
+        <p className="kicker c-yellow" style={{ fontSize: 26 }}>
+          Etape {stage.n} · Udbrudsforsøget
+        </p>
+        <h1 className="h-title c-paper" style={{ marginTop: 14 }}>
+          {active ? active.name : 'Hvem stikker af?'}
+        </h1>
+      </div>
+      {run && (
+        <>
+          <Medallion value={streak} label="I TRÆK" color={run.done && streak < max ? 'red' : 'yellow'} size={210} valueSize={96} style={{ position: 'absolute', left: 1180, top: 60 }} />
+          <div className="proj-cards">
+            {cards.map((c, i) => (
+              <div key={offset + i} className="proj-card-wrap">
+                {i > 0 && <span className={`proj-guess ${verdict(i)}`}>{run.guesses[offset + i - 1] === 'op' ? '▲' : '▼'}</span>}
+                <PlayingCard card={c} width={190} state={verdict(i)} />
+              </div>
+            ))}
           </div>
-        </div>
-        <div className="proj-quiz-body">
-          <Medallion value={row + 1} label="FELT" color="red" size={220} valueSize={100} />
-          <div>
-            <p className="kicker c-red" style={{ fontSize: 28 }}>
-              Sang nr. i playlisten
-            </p>
-            <div className="num" style={{ fontSize: 200, lineHeight: 1 }}>
-              {songNumber(counts, cat, row)}
-            </div>
-          </div>
-        </div>
-        {reveal && <div className="proj-answer">{c.answers[row]}</div>}
+          <p className={`proj-highlow-status ${run.done ? (streak >= max ? 'max' : 'out') : ''}`}>
+            {!run.done ? 'Højere eller lavere?' : streak >= max ? 'Helt alene foran – maks. udbrud!' : 'Hentet af feltet!'}
+          </p>
+        </>
+      )}
+      <div className="proj-board">
+        <p className="kicker c-yellow" style={{ fontSize: 20 }}>
+          Længste udbrud
+        </p>
+        <ol>
+          {board.map(({ r, b }) => (
+            <li key={r.id}>
+              <span className="grow">{r.name}</span> <span className="num c-yellow">{b}</span>
+            </li>
+          ))}
+          {!board.length && <li className="muted">Ingen endnu</li>}
+        </ol>
       </div>
     </div>
   );
@@ -166,8 +200,8 @@ export function ProjectorOverlay() {
   switch (projector.kind) {
     case 'stopwatch':
       return <StopwatchView stage={projector.stage} />;
-    case 'quiz':
-      return <QuizCardView cat={projector.cat} row={projector.row} reveal={projector.reveal} />;
+    case 'highlow':
+      return <HighLowView />;
     case 'vinokourov':
       return <VinokourovView />;
     case 'bracket':

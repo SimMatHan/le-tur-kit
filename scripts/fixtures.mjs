@@ -16,8 +16,10 @@ export function fullRun(status = 'finished') {
       3: st(
         {
           type: 'udbrud',
-          quiz: { '0-0': ['a', 'b', 'c'].map(id), '0-4': [id('a')], '2-3': ['c', 'd'].map(id), '4-2': [id('e')] },
-          dice: m({ a: 0, b: 4.2, c: 12.5, d: 2, e: 7.7, f: 20 }),
+          runs: {},
+          manual: m({ a: 3, b: 2, c: 5, d: 1, e: 4, f: 0 }),
+          deck: [],
+          active: null,
         },
         status,
       ),

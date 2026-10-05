@@ -1,6 +1,5 @@
-// Fælles stopur til etape 1, 3 og 4: start, og klik på rytterens navn, når han
-// er færdig. Tiden registreres pr. rytter. Kan også startes af første klik
-// (terningkast: den første 6'er får 0 sek.).
+// Fælles stopur (etape 1 og 4): start, og klik på rytterens navn, når han er
+// færdig. Tiden registreres pr. rytter.
 import { useEffect, useState } from 'react';
 import { useCommissioner } from '../commissioner/CommissionerContext';
 import { formatTime } from '../game/format';
@@ -32,27 +31,18 @@ interface Props {
   times: Record<string, number | null | undefined>;
   onSplit: (riderId: string, sec: number) => void;
   onClear: (riderId: string) => void;
-  /** Første klik på en rytter starter uret og giver 0 sek. */
-  startOnFirstSplit?: boolean;
   /** Ryttere, der ikke skal kunne klikkes (fx endnu ikke relevante). */
   disabled?: Set<string>;
   label?: string;
   onShowOnProjector?: () => void;
 }
 
-export function Stopwatch({ riders, times, onSplit, onClear, startOnFirstSplit, disabled, label, onShowOnProjector }: Props) {
+export function Stopwatch({ riders, times, onSplit, onClear, disabled, label, onShowOnProjector }: Props) {
   const { clock, startClock, stopClock, resetClock, elapsed } = useCommissioner();
   const running = !!clock.startedAt;
-  const anyTime = riders.some((r) => typeof times[r.id] === 'number');
 
   const split = (id: string) => {
-    if (!running) {
-      if (startOnFirstSplit && !anyTime && clock.stoppedMs === 0) {
-        startClock();
-        onSplit(id, 0);
-      }
-      return;
-    }
+    if (!running) return;
     onSplit(id, elapsed());
     // Stop automatisk, når alle er i mål.
     const left = riders.filter((r) => r.id !== id && typeof times[r.id] !== 'number' && !disabled?.has(r.id));
@@ -69,7 +59,7 @@ export function Stopwatch({ riders, times, onSplit, onClear, startOnFirstSplit, 
               Stop
             </button>
           ) : (
-            <button type="button" className="btn btn-go" onClick={startClock} disabled={startOnFirstSplit && !anyTime && clock.stoppedMs === 0}>
+            <button type="button" className="btn btn-go" onClick={startClock}>
               {clock.stoppedMs ? 'Fortsæt' : 'Start'}
             </button>
           )}
@@ -84,12 +74,7 @@ export function Stopwatch({ riders, times, onSplit, onClear, startOnFirstSplit, 
         </div>
       </div>
       <p className="hint">
-        {label ??
-          (startOnFirstSplit && !running && !anyTime
-            ? 'Klik på den første, der slår en 6’er – uret starter, og han får 0 sek.'
-            : running
-              ? 'Klik på rytterens navn, når han er færdig.'
-              : 'Start uret, og klik på rytterens navn, når han er færdig.')}
+        {label ?? (running ? 'Klik på rytterens navn, når han er færdig.' : 'Start uret, og klik på rytterens navn, når han er færdig.')}
       </p>
       <div className="split-grid">
         {riders.map((r) => {
@@ -100,7 +85,7 @@ export function Stopwatch({ riders, times, onSplit, onClear, startOnFirstSplit, 
               <button
                 type="button"
                 className="split-btn"
-                disabled={has || disabled?.has(r.id) || (!running && !(startOnFirstSplit && !anyTime && clock.stoppedMs === 0))}
+                disabled={has || disabled?.has(r.id) || !running}
                 onClick={() => split(r.id)}
               >
                 <span className="split-no">{r.number}</span>

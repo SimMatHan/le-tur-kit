@@ -1,5 +1,5 @@
 // Kommissærtilstand (ikke gemt): hvilket panel der er åbent, stopurets ur,
-// hvad der vises på projektoren, og det åbne quizkort. Ved fjernbetjening
+// og hvad der vises på projektoren. Ved fjernbetjening
 // synkroniseres projektor-visning og ur mellem telefon og skærm.
 import { createContext, useCallback, useContext, useEffect, useMemo, useRef, useState, type ReactNode } from 'react';
 import { roundTenth } from '../game/format';

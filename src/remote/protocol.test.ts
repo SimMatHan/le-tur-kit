@@ -92,7 +92,7 @@ describe('beskeder', () => {
       seq: 3,
     });
     expect(sanitizePatch({ nav: -1, overlay: 'hack', projector: { kind: 'script' }, clock: { startedAt: 'x', stoppedMs: 1 } })).toEqual({});
-    expect(sanitizePatch({ projector: { kind: 'quiz', cat: 1, row: 2, reveal: false } }).projector).toMatchObject({ kind: 'quiz' });
+    expect(sanitizePatch({ projector: { kind: 'highlow' } }).projector).toEqual({ kind: 'highlow' });
     expect(sanitizePatch({ clock: { startedAt: null, stoppedMs: 1500 } }).clock).toEqual({ startedAt: null, stoppedMs: 1500 });
     expect(sanitizePatch(null)).toEqual({});
   });

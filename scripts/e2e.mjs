@@ -227,29 +227,18 @@ await step('Kommissæren kører alle 5 etaper via panelerne (samme resultat som 
   await bonus.locator('.bonus-row').nth(1).getByRole('button', { name: 'Dorte' }).click();
   await finish();
 
-  // Etape 3: quiz og terningtider
+  // Etape 3: udbrudsforsøget – Anna spiller i appen (fast blanding), resten tastes manuelt
   await tab(3);
-  const quiz = section('Musikquiz');
-  const cell = (c, r) => quiz.locator('.mini-col').nth(c).locator('.mini-cell').nth(r);
-  const answer = async (c, r, who) => {
-    await cell(c, r).click();
-    for (const n of who) await quiz.locator('.toggle', { hasText: n }).click();
-    await quiz.getByRole('button', { name: 'Luk kort (marker brugt)' }).click();
-  };
-  await cell(0, 0).click();
-  const card = await page.locator('.scene').innerText();
-  expect(/sang nr. i playlisten/i.test(card) && /Sportsevent/.test(card), 'quizkortet vises ikke på skærmen');
-  expect(!card.includes('Volbeat'), 'svaret må ikke vises på skærmen som standard');
-  await quiz.getByRole('button', { name: 'Vis svar på skærmen' }).click();
-  expect((await page.locator('.scene').innerText()).includes('Volbeat'), 'svaret kan ikke vises på skærmen');
-  await quiz.getByRole('button', { name: 'Luk kort (marker brugt)' }).click();
-  await quiz.getByRole('button', { name: 'Nulstil felt' }).count(); // felt 0-0 er nu brugt uden svar
-  await answer(0, 0, ['Anna', 'Bent', 'Carl']);
-  await answer(0, 4, ['Anna']);
-  await answer(2, 3, ['Carl', 'Dorte']);
-  await answer(4, 2, ['Erik']);
-  expect((await quiz.locator('.mini-cell.used').count()) === 4, 'brugte felter markeres ikke');
-  for (const [n, v] of [['Anna', '0'], ['Bent', '4,2'], ['Carl', '12,5'], ['Dorte', '2'], ['Erik', '7,7'], ['Frida', '20']]) await fill(`Terningtid for ${n}`, v);
+  await page.evaluate(() => (Math.random = () => 0.99)); // sorteret bunke: 2♠, 3♠, 4♠ …
+  const hl = section('Udbrudsforsøget');
+  await hl.locator('.toggle', { hasText: 'Anna' }).click();
+  for (let i = 0; i < 3; i++) await hl.getByRole('button', { name: '▲ Højere' }).click(); // 3♠, 4♠, 5♠
+  await hl.getByRole('button', { name: '▼ Lavere' }).click(); // 6♠ – forkert
+  expect((await hl.innerText()).includes('Hentet af feltet efter 3 rigtige'), 'forsøget i appen blev ikke talt rigtigt');
+  const scr = await page.locator('.scene').innerText();
+  expect(/Udbrudsforsøget/i.test(scr) && scr.includes('Hentet af feltet!'), 'udbrudsforsøget vises ikke på skærmen');
+  await page.keyboard.press('Escape');
+  for (const [n, v] of [['Bent', '2'], ['Carl', '5'], ['Dorte', '1'], ['Erik', '4'], ['Frida', '0']]) await fill(`Udbrud for ${n}`, v);
   await finish();
 
   // Etape 4: beerpong, terningsum og bajer-tider
@@ -289,7 +278,7 @@ await step('Kommissæren kører alle 5 etaper via panelerne (samme resultat som 
   await page.keyboard.press('s');
   await page.waitForTimeout(300);
   const ov = await page.locator('.scene').innerText();
-  for (const s of ['Efter 5 af 5 etaper', '10,4', '+7,9', '+35,8', '83 p', '63 p', '26 p', '21 p']) expect(ov.includes(s), `klassement mangler "${s}"`);
+  for (const s of ['Efter 5 af 5 etaper', '6,9', '+3,5', '+19,3', '80 p', '70 p', '29 p', '22 p']) expect(ov.includes(s), `klassement mangler "${s}"`);
   await page.keyboard.press('Escape');
 
   // Spiltilstanden overlever genindlæsning
@@ -297,7 +286,7 @@ await step('Kommissæren kører alle 5 etaper via panelerne (samme resultat som 
   await waitReload();
   await page.keyboard.press('s');
   await page.waitForTimeout(300);
-  expect((await page.locator('.scene').innerText()).includes('83 p'), 'resultater ikke bevaret efter genindlæsning');
+  expect((await page.locator('.scene').innerText()).includes('80 p'), 'resultater ikke bevaret efter genindlæsning');
   await page.keyboard.press('Escape');
 });
 
@@ -319,16 +308,16 @@ await step('Klassement, stilling og podie viser resultater fra spiltilstanden (f
   if (process.env.E2E_SHOTS) await page.screenshot({ path: `${process.env.E2E_SHOTS}/klassement.png` });
   const overlay = await page.locator('.scene').innerText();
   expect(/Efter 5 af 5 etaper/.test(overlay), 'overlay viser ikke 5 etaper');
-  expect(overlay.includes('10,4'), 'førerens tid 10,4 mangler');
-  expect(overlay.includes('83 p') && overlay.includes('26 p'), 'point mangler');
+  expect(overlay.includes('6,9'), 'førerens tid 6,9 mangler');
+  expect(overlay.includes('80 p') && overlay.includes('29 p'), 'point mangler');
   await page.keyboard.press('Escape');
   // Podiet er sidste slide
   await page.keyboard.press('End');
   await page.waitForTimeout(400);
   if (process.env.E2E_SHOTS) await page.screenshot({ path: `${process.env.E2E_SHOTS}/podie.png` });
   const podium = await sceneText();
-  for (const n of ['Anna', 'Bent', 'Dorte', 'Erik']) expect(podium.includes(n), `${n} mangler på podiet`);
-  // Stilling efter etape 3: Anna fører med 5,4
+  for (const n of ['Carl', 'Anna', 'Bent', 'Erik']) expect(podium.includes(n), `${n} mangler på podiet`);
+  // Stilling efter etape 3: Carl fører med 4,9
   const total = await slideCount();
   for (let i = 1; i <= total; i++) {
     await page.evaluate((n) => (location.hash = `#/${n}`), i);
@@ -336,7 +325,7 @@ await step('Klassement, stilling og podie viser resultater fra spiltilstanden (f
     const t = await sceneText();
     if (t.includes('Stillingen efter etape 3')) {
       if (process.env.E2E_SHOTS) await page.screenshot({ path: `${process.env.E2E_SHOTS}/stilling-3.png` });
-      expect(t.includes('5,4'), 'stilling efter etape 3 forkert');
+      expect(t.includes('4,9'), 'stilling efter etape 3 forkert');
       return;
     }
   }
